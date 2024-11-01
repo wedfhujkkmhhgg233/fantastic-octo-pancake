@@ -54,16 +54,24 @@ app.get('/package-lock', (req, res) => {
 
 // /service-list endpoint to return the service list
 app.get('/service-list', (req, res) => {
-    const services = [
-        {
-            name: "downloader",
-            author: "lance cochangco",
-            description: "video downloader",
-            category: "media",
-            link: ["/downloader"]
+    const servicesDir = path.join(__dirname, 'services');
+    const services = [];
+
+    fs.readdir(servicesDir, (err, files) => {
+        if (err) {
+            return res.status(500).json({ error: 'failed to read services directory' });
         }
-    ];
-    res.json(services);
+
+        files.forEach(file => {
+            if (path.extname(file) === '.json') {
+                const filePath = path.join(servicesDir, file);
+                const data = fs.readFileSync(filePath, 'utf8');
+                services.push(JSON.parse(data));
+            }
+        });
+
+        res.json(services);
+    });
 });
 
 // Route to serve downloader.html

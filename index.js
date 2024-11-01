@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 // Middleware to serve static files from the root directory
 app.use(express.static(path.join(__dirname))); // Serve static files from the root directory
@@ -16,18 +16,18 @@ app.get('/', (req, res) => {
 app.get('/config', (req, res) => {
     const configResponse = {
         port: "3000",
-        name: "Jer Web",
-        name2: "Jerome Jamis",
-        description: "Profile",
+        name: "jer web",
+        name2: "jerome jamis",
+        description: "profile",
         email: "jeromejamis55@gmail.com",
-        number: "N/A",
+        number: "n/a",
         birthday: "2010-04-25",
-        birthday2: "April 25, 2010",
-        location: "El Salvador City, Philippines",
-        facebook: "https://www.facebook.com/JeromeExpertise",
+        birthday2: "april 25, 2010",
+        location: "el salvador city, philippines",
+        facebook: "https://www.facebook.com/jeromeexpertise",
         github: "https://github.com/wedfhujkkmhhgg233/",
         twitter: "https://simsimi.ooguy.com/",
-        linkedin: "N/A"
+        linkedin: "n/a"
     };
     res.json(configResponse);
 });
@@ -36,7 +36,7 @@ app.get('/config', (req, res) => {
 app.get('/package', (req, res) => {
     fs.readFile(path.join(__dirname, 'package.json'), 'utf8', (err, data) => {
         if (err) {
-            return res.status(500).json({ error: 'Failed to read package.json' });
+            return res.status(500).json({ error: 'failed to read package.json' });
         }
         res.json(JSON.parse(data));
     });
@@ -46,13 +46,32 @@ app.get('/package', (req, res) => {
 app.get('/package-lock', (req, res) => {
     fs.readFile(path.join(__dirname, 'package-lock.json'), 'utf8', (err, data) => {
         if (err) {
-            return res.status(500).json({ error: 'Failed to read package-lock.json' });
+            return res.status(500).json({ error: 'failed to read package-lock.json' });
         }
         res.json(JSON.parse(data));
     });
 });
 
+// /service-list endpoint to return the service list
+app.get('/service-list', (req, res) => {
+    const services = [
+        {
+            name: "downloader",
+            author: "lance cochangco",
+            description: "video downloader",
+            category: "media",
+            link: ["/downloader"]
+        }
+    ];
+    res.json(services);
+});
+
+// Route to serve downloader.html
+app.get('/downloader', (req, res) => {
+    res.sendFile(path.join(__dirname, 'downloader.html'));
+});
+
 // Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
 });

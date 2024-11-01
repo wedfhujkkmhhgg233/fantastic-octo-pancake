@@ -1,0 +1,7 @@
+{
+            name: "downloader",
+            author: "lance cochangco",
+            description: "video downloader",
+            category: "media",
+            link: ["/downloader"]
+        }

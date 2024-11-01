@@ -17,7 +17,7 @@ app.get('/config', (req, res) => {
     const configResponse = {
         port: "3000",
         name: "jer web",
-        name2: "jerome jamis",
+        name2: "Jerome Jamis",
         description: "profile",
         email: "jeromejamis55@gmail.com",
         number: "n/a",

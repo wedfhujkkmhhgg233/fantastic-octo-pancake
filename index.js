@@ -16,18 +16,18 @@ app.get('/', (req, res) => {
 app.get('/config', (req, res) => {
     const configResponse = {
         port: "3000",
-        name: "jer web",
+        name: "Jer Web",
         name2: "Jerome Jamis",
         description: "profile",
         email: "jeromejamis55@gmail.com",
         number: "n/a",
         birthday: "2010-04-25",
-        birthday2: "april 25, 2010",
-        location: "el salvador city, philippines",
+        birthday2: "April 25, 2010",
+        location: "El Salvador City, Philippines",
         facebook: "https://www.facebook.com/jeromeexpertise",
         github: "https://github.com/wedfhujkkmhhgg233/",
         twitter: "https://simsimi.ooguy.com/",
-        linkedin: "n/a"
+        linkedin: "N/a"
     };
     res.json(configResponse);
 });

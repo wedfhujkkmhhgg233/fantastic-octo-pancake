@@ -67,7 +67,7 @@ app.get('/service-list', (req, res) => {
 });
 
 // Route to serve downloader.html
-app.get('/downloader', (req, res) => {
+app.get('/service/downloader', (req, res) => {
     res.sendFile(path.join(__dirname, 'downloader.html'));
 });
 

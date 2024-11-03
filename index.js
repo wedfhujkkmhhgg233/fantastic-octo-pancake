@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const aiRouter = require('./api/ai').router; // Import AI router
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -93,7 +94,7 @@ app.get('/service-list', (req, res) => {
     });
 });
 
-// Load API routes for Bing, Gemini, and Alldl services
+// Load API routes for Bing, Gemini, Alldl, and AI services
 const bingRouter = require('./api/bing').router;
 app.use('/service/api', bingRouter); // Route to access Bing API as /service/api/bing
 
@@ -102,6 +103,8 @@ app.use('/service/api', geminiRouter); // Route to access Gemini API as /service
 
 const alldlRouter = require('./api/alldl').router;
 app.use('/service/api', alldlRouter); // Route to access Alldl API as /service/api/alldl
+
+app.use('/service/api', aiRouter); // Route to access AI API as /service/api/ai
 
 // Route to serve downloader.html
 app.get('/service/downloader', (req, res) => {

@@ -79,6 +79,10 @@ app.get('/service/downloader', (req, res) => {
     res.sendFile(path.join(__dirname, 'downloader.html'));
 });
 
+app.get('/service/sim', (req, res) => {
+    res.sendFile(path.join(__dirname, 'sim.html'));
+});
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

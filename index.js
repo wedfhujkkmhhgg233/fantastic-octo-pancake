@@ -97,6 +97,9 @@ app.get('/service-list', (req, res) => {
 const { router } = require('./api/bing');
 app.use('/service/api', router);
 
+const { router } = require('./api/gemini');
+app.use('/service/api', router);
+
 // Route to serve downloader.html
 app.get('/service/downloader', (req, res) => {
     res.sendFile(path.join(__dirname, 'downloader.html'));

@@ -7,6 +7,9 @@ const port = process.env.PORT || 3000;
 // Middleware to serve static files from the root directory
 app.use(express.static(path.join(__dirname))); // Serve static files from the root directory
 
+// Middleware to parse JSON bodies
+app.use(express.json());
+
 // Route to serve the index.html file
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -54,9 +57,11 @@ app.get('/package-lock', (req, res) => {
 
 // /service-list endpoint to return the service list
 app.get('/service-list', (req, res) => {
-    const servicesDir = path.join(__dirname, 'services');
     const services = [];
+    const servicesDir = path.join(__dirname, 'services');
+    const apiDir = path.join(__dirname, 'api');
 
+    // Read services directory for JSON files
     fs.readdir(servicesDir, (err, files) => {
         if (err) {
             return res.status(500).json({ error: 'failed to read services directory' });
@@ -70,15 +75,34 @@ app.get('/service-list', (req, res) => {
             }
         });
 
-        res.json(services);
+        // Read api directory for API service metadata
+        fs.readdir(apiDir, (err, apiFiles) => {
+            if (err) {
+                return res.status(500).json({ error: 'failed to read api directory' });
+            }
+
+            apiFiles.forEach(file => {
+                if (path.extname(file) === '.js') {
+                    const { serviceMetadata } = require(path.join(apiDir, file));
+                    services.push(serviceMetadata);
+                }
+            });
+
+            res.json(services);
+        });
     });
 });
+
+// Load API routes
+const { router } = require('./api/bing');
+app.use('/api', router);
 
 // Route to serve downloader.html
 app.get('/service/downloader', (req, res) => {
     res.sendFile(path.join(__dirname, 'downloader.html'));
 });
 
+// Additional service routes as needed
 app.get('/service/sim', (req, res) => {
     res.sendFile(path.join(__dirname, 'sim.html'));
 });
@@ -87,3 +111,4 @@ app.get('/service/sim', (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
+    

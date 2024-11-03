@@ -93,18 +93,15 @@ app.get('/service-list', (req, res) => {
     });
 });
 
-// Load API routes for Bing, Gemini, Lyrics, and Chords services
+// Load API routes for Bing, Gemini, and Alldl services
 const bingRouter = require('./api/bing').router;
 app.use('/service/api', bingRouter); // Route to access Bing API as /service/api/bing
 
 const geminiRouter = require('./api/gemini').router;
 app.use('/service/api', geminiRouter); // Route to access Gemini API as /service/api/gemini
 
-const lyricsRouter = require('./api/lyrics').router; // Add the lyrics router
-app.use('/service/api', lyricsRouter); // Route to access Lyrics API as /service/api/lyrics
-
-const chordsRouter = require('./api/chords').router; // Add the chords router
-app.use('/service/api', chordsRouter); // Route to access Chords API as /service/api/chords
+const alldlRouter = require('./api/alldl').router;
+app.use('/service/api', alldlRouter); // Route to access Alldl API as /service/api/alldl
 
 // Route to serve downloader.html
 app.get('/service/downloader', (req, res) => {
@@ -116,9 +113,9 @@ app.get('/service/sim', (req, res) => {
     res.sendFile(path.join(__dirname, 'sim.html'));
 });
 
-// 404 Error Handler
+// 404 error handler
 app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, '404.html'));
+    res.status(404).sendFile(path.join(__dirname, '404.html')); // Assuming you have a 404.html file
 });
 
 // Start the server

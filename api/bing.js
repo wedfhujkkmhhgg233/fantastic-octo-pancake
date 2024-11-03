@@ -30,7 +30,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Image generator",
     category: "Image",
-    link: ["/service/api/bing?prompt="]
+    link: ["/api/bing?prompt="]
 };
 
 module.exports = { router, serviceMetadata };

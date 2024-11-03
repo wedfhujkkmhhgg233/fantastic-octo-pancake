@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimSimi API Documentation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #111827;
+            color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+        }
+        .highlight {
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background-color: #1f2937;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-6">
+
+    <header class="text-center mb-8">
+        <h1 class="text-4xl font-bold highlight">SimSimi API Documentation</h1>
+        <p class="text-lg text-gray-400">Interact with the SimSimi AI</p>
+    </header>
+
+    <main class="w-full max-w-2xl">
+        <div class="card">
+            <h2 class="text-2xl font-semibold">Get Response</h2>
+            <p class="text-gray-300">Use this endpoint to get a response from SimSimi.</p>
+            <div class="mt-4">
+                <code class="block bg-gray-800 p-2 rounded">GET https://simsimi-api-pro.onrender.com/sim?query=hi</code>
+                <h3 class="text-lg mt-4">Example Response:</h3>
+                <pre class="bg-gray-900 p-2 rounded"><code>{"respond":"hello"}</code></pre>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="text-2xl font-semibold">Teach SimSimi</h2>
+            <p class="text-gray-300">Use this endpoint to teach SimSimi new responses.</p>
+            <div class="mt-4">
+                <code class="block bg-gray-800 p-2 rounded">GET https://simsimi-api-pro.onrender.com/teach?ask=hi&ans=pogi mo nmn hi pogi</code>
+                <h3 class="text-lg mt-4">Example Response:</h3>
+                <pre class="bg-gray-900 p-2 rounded"><code>{"respond":"SimSimi learned this new answer (359th) for question \"hi\" and the new response is \"pogi mo nmn hi pogi\""}</code></pre>
+            </div>
+        </div>
+
+        <footer class="text-center mt-10">
+            <p class="text-gray-500">&copy; 2024 SimSimi API. All rights reserved.</p>
+        </footer>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#ffffff" },
+                shape: { type: "circle", stroke: { width: 0, color: "#000000" }, polygon: { nb_sides: 5 }, },
+                opacity: { value: 0.5, random: false },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 6, direction: "none" },
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: { onhover: { enable: true, mode: "repulse" }, onclick: { enable: true, mode: "push" } },
+            },
+            retina_detect: true
+        });
+    </script>
+</body>
+      </html>
+              

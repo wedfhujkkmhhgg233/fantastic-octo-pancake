@@ -32,7 +32,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Image generator",
     category: "Image",
-    link: ["/api/search"]
+    link: ["/api/search?prompt="]
 };
 
 // Export the router and metadata

@@ -2,14 +2,25 @@ const express = require('express');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 
 const router = express.Router();
 
-// Function to generate a unique, randomized filename
-const generateUniqueFileName = () => {
-    const randomString = crypto.randomBytes(8).toString('hex'); // Random 16-character hex string
-    return `Jer-spotify-pro-${randomString}.mp3`;
+// List of existing MP3 file names
+const existingFiles = [
+    'jer.mp3',
+    'jer1.mp3',
+    'jer2.mp3',
+    'jer3.mp3',
+    'jer4.mp3',
+    'jer5.mp3',
+    'jer6.mp3',
+    'jer7.mp3',
+];
+
+// Function to get a random existing file name
+const getRandomExistingFileName = () => {
+    const randomIndex = Math.floor(Math.random() * existingFiles.length);
+    return existingFiles[randomIndex];
 };
 
 // Spotify track fetch and download route
@@ -41,15 +52,17 @@ router.get('/spotify-download', async (req, res) => {
 
         const downloadUrl = trackDetails.data.result.download_url;
 
-        // Download the MP3 file with a unique name
-        const mp3FileName = generateUniqueFileName();
-        const mp3Path = path.join(__dirname, '..', 'public', mp3FileName);
-        const mp3Stream = fs.createWriteStream(mp3Path);
+        // Select a random existing MP3 file name
+        const selectedFileName = getRandomExistingFileName();
+        const mp3Path = path.join(__dirname, '..', 'public', selectedFileName);
+
+        // Download the MP3 file
         const response = await axios.get(downloadUrl, { responseType: 'stream' });
+        const mp3Stream = fs.createWriteStream(mp3Path);
 
         response.data.pipe(mp3Stream);
 
-        // Set file expiration
+        // Set file expiration (if needed)
         setTimeout(() => {
             if (fs.existsSync(mp3Path)) {
                 fs.unlinkSync(mp3Path);
@@ -57,7 +70,8 @@ router.get('/spotify-download', async (req, res) => {
         }, 180000); // 3 minutes
 
         mp3Stream.on('finish', () => {
-            const fileUrl = `https://jerome-web.gleeze.com/public/${mp3FileName}`;
+            // Update to your website's base URL
+            const fileUrl = `https://jerome-web.gleeze.com/public/${selectedFileName}`;
             res.json({ downloadUrl: fileUrl });
         });
 

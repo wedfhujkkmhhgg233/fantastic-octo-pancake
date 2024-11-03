@@ -93,18 +93,18 @@ app.get('/service-list', (req, res) => {
     });
 });
 
-// Load API routes for Bing, Gemini, and Spotify services
+// Load API routes for Bing, Gemini, Lyrics, and Chords services
 const bingRouter = require('./api/bing').router;
 app.use('/service/api', bingRouter); // Route to access Bing API as /service/api/bing
 
 const geminiRouter = require('./api/gemini').router;
 app.use('/service/api', geminiRouter); // Route to access Gemini API as /service/api/gemini
 
-const spotifyRouter = require('./api/spotify').router; // Load Spotify router
-app.use('/service/api', spotifyRouter); // Route to access Spotify API as /service/api/spotify-download
+const lyricsRouter = require('./api/lyrics').router; // Add the lyrics router
+app.use('/service/api', lyricsRouter); // Route to access Lyrics API as /service/api/lyrics
 
-const chordsRouter = require('./api/chords').router; // Load Chords router
-app.use('/service/api', spotifyRouter);
+const chordsRouter = require('./api/chords').router; // Add the chords router
+app.use('/service/api', chordsRouter); // Route to access Chords API as /service/api/chords
 
 // Route to serve downloader.html
 app.get('/service/downloader', (req, res) => {
@@ -120,3 +120,4 @@ app.get('/service/sim', (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
+        

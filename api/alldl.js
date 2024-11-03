@@ -28,7 +28,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Downloads media from various platforms.",
     category: "Media",
-    link: ["/service/api/alldl?url="]
+    link: ["/api/alldl?url="]
 };
 
 module.exports = { router, serviceMetadata };

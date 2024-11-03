@@ -4,7 +4,6 @@ const Gemini = require('@onepunya/ez-gemini');
 const router = express.Router();
 const gemini = new Gemini();
 
-// Endpoint to interact with Gemini API based on user-provided ask and optional imgurl parameters
 router.get('/gemini', async (req, res) => {
     const { ask, imgurl } = req.query;
     const response = {};
@@ -29,13 +28,13 @@ router.get('/gemini', async (req, res) => {
     }
 });
 
-// Service metadata for the service-list
+// Service metadata for /service-list endpoint
 const serviceMetadata = {
     name: "GeminiService",
     author: "Jerome",
     description: "Gemini API Service for text and image processing",
     category: "AI Services",
-    link: ["/api/gemini?ask=&imgurl="]
+    link: ["/service/api/gemini?ask=&imgurl="]
 };
 
 // Export the router and metadata

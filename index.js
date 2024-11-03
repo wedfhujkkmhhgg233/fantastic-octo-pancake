@@ -5,7 +5,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware to serve static files from the root directory
-app.use(express.static(path.join(__dirname))); // Serve static files from the root directory
+app.use(express.static(path.join(__dirname)));
 
 // Middleware to parse JSON bodies
 app.use(express.json());
@@ -93,12 +93,12 @@ app.get('/service-list', (req, res) => {
     });
 });
 
-// Load API routes
-const { router } = require('./api/bing');
-app.use('/service/api', router);
+// Load API routes for Bing and Gemini services
+const bingRouter = require('./api/bing').router;
+app.use('/service/api/bing', bingRouter);
 
-const { router } = require('./api/gemini');
-app.use('/service/api', router);
+const geminiRouter = require('./api/gemini').router;
+app.use('/service/api/gemini', geminiRouter);
 
 // Route to serve downloader.html
 app.get('/service/downloader', (req, res) => {
@@ -114,4 +114,3 @@ app.get('/service/sim', (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
-    

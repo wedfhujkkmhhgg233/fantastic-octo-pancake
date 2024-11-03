@@ -13,18 +13,9 @@ router.get('/alldl', async (req, res) => {
 
     try {
         const data = await alldown(url);
-        
-        // Construct the response
-        res.json({
-            success: true,
-            author: "Jerome",
-            status: data.status,
-            media: {
-                title: data.media.title,
-                low: data.media.low,
-                high: data.media.high
-            }
-        });
+
+        // Return the original response without modifications
+        res.json(data);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'An error occurred while processing the download request.' });
@@ -37,7 +28,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Downloads media from various platforms.",
     category: "Media",
-    link: ["/api/alldl?url="]
+    link: ["/service/api/alldl?url="]
 };
 
 module.exports = { router, serviceMetadata };

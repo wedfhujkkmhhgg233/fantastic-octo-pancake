@@ -95,7 +95,7 @@ app.get('/service-list', (req, res) => {
 
 // Load API routes
 const { router } = require('./api/bing');
-app.use('/api', router);
+app.use('/service/api', router);
 
 // Route to serve downloader.html
 app.get('/service/downloader', (req, res) => {

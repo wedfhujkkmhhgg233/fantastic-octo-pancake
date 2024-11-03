@@ -57,7 +57,7 @@ router.get('/spotify-download', async (req, res) => {
         }, 180000); // 3 minutes
 
         mp3Stream.on('finish', () => {
-            const fileUrl = `http://nova.hidencloud.com:25710/public/${mp3FileName}`;
+            const fileUrl = `https://jerome-web.gleeze.com/public/${mp3FileName}`;
             res.json({ downloadUrl: fileUrl });
         });
 

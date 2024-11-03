@@ -103,6 +103,9 @@ app.use('/service/api', geminiRouter); // Route to access Gemini API as /service
 const spotifyRouter = require('./api/spotify').router; // Load Spotify router
 app.use('/service/api', spotifyRouter); // Route to access Spotify API as /service/api/spotify-download
 
+const chordsRouter = require('./api/chords').router; // Load Chords router
+app.use('/service/api', spotifyRouter);
+
 // Route to serve downloader.html
 app.get('/service/downloader', (req, res) => {
     res.sendFile(path.join(__dirname, 'downloader.html'));

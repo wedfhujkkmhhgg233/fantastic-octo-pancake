@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// /config endpoint
+// /config endpoint to provide configuration details
 app.get('/config', (req, res) => {
     const configResponse = {
         port: "3000",
@@ -39,7 +39,7 @@ app.get('/config', (req, res) => {
 app.get('/package', (req, res) => {
     fs.readFile(path.join(__dirname, 'package.json'), 'utf8', (err, data) => {
         if (err) {
-            return res.status(500).json({ error: 'failed to read package.json' });
+            return res.status(500).json({ error: 'Failed to read package.json' });
         }
         res.json(JSON.parse(data));
     });
@@ -49,13 +49,13 @@ app.get('/package', (req, res) => {
 app.get('/package-lock', (req, res) => {
     fs.readFile(path.join(__dirname, 'package-lock.json'), 'utf8', (err, data) => {
         if (err) {
-            return res.status(500).json({ error: 'failed to read package-lock.json' });
+            return res.status(500).json({ error: 'Failed to read package-lock.json' });
         }
         res.json(JSON.parse(data));
     });
 });
 
-// /service-list endpoint to return the service list
+// /service-list endpoint to combine and return all service metadata
 app.get('/service-list', (req, res) => {
     const services = [];
     const servicesDir = path.join(__dirname, 'services');
@@ -64,7 +64,7 @@ app.get('/service-list', (req, res) => {
     // Read services directory for JSON files
     fs.readdir(servicesDir, (err, files) => {
         if (err) {
-            return res.status(500).json({ error: 'failed to read services directory' });
+            return res.status(500).json({ error: 'Failed to read services directory' });
         }
 
         files.forEach(file => {
@@ -78,7 +78,7 @@ app.get('/service-list', (req, res) => {
         // Read api directory for API service metadata
         fs.readdir(apiDir, (err, apiFiles) => {
             if (err) {
-                return res.status(500).json({ error: 'failed to read api directory' });
+                return res.status(500).json({ error: 'Failed to read api directory' });
             }
 
             apiFiles.forEach(file => {
@@ -95,17 +95,17 @@ app.get('/service-list', (req, res) => {
 
 // Load API routes for Bing and Gemini services
 const bingRouter = require('./api/bing').router;
-app.use('/service/api/bing', bingRouter);
+app.use('/service/api', bingRouter); // Route to access Bing API as /service/api/bing
 
 const geminiRouter = require('./api/gemini').router;
-app.use('/service/api/gemini', geminiRouter);
+app.use('/service/api', geminiRouter); // Route to access Gemini API as /service/api/gemini
 
 // Route to serve downloader.html
 app.get('/service/downloader', (req, res) => {
     res.sendFile(path.join(__dirname, 'downloader.html'));
 });
 
-// Additional service routes as needed
+// Additional service routes
 app.get('/service/sim', (req, res) => {
     res.sendFile(path.join(__dirname, 'sim.html'));
 });
@@ -114,3 +114,4 @@ app.get('/service/sim', (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
+        

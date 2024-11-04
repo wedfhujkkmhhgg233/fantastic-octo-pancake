@@ -110,12 +110,12 @@ app.use('/service/api', alldlRouter); // Route to access Alldl API as /service/a
 app.use('/service/api', aiRouter); // Route to access AI API as /service/api/ai
 
 // Route to serve downloader.html
-app.get('/service/downloader', (req, res) => {
+app.get('/downloader', (req, res) => {
     res.sendFile(path.join(__dirname, 'downloader.html'));
 });
 
 // Additional service routes
-app.get('/service/sim', (req, res) => {
+app.get('/sim', (req, res) => {
     res.sendFile(path.join(__dirname, 'sim.html'));
 });
 

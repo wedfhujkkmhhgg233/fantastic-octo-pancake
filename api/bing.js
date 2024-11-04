@@ -1,5 +1,5 @@
 const express = require('express');
-const { bing } = require('./node_modules/nayan-bing-api/src'); // Updated import path
+const { bing } = require('./node_modules/nayan-bing-api'); // Updated import path
 
 const router = express.Router();
 const key = "Nayan";

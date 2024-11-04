@@ -1,9 +1,7 @@
 const express = require('express');
-const { bing } = require('./node_modules/nayan-bing-api/src'); // Updated import path
+const axios = require('axios');
 
 const router = express.Router();
-const key = "Nayan";
-const cookie = "1d6krfybFWYR3cxvOkhT9Tnos4wDZ61Ark2DbT1HuKpDcebTJ55KqxvVg_xvs8WuFalZQBCZ9zB6j_nHaNyt2DKsarkKDMJZeTepeWetPCmShmJ_KlKgC2L9xI92NKlt_XjFnXzwryEBZYDU4vg0-BnYBeEtVREDzRENgJOttD4mc-7h_4xgB6rko2FYBculfq42bCPVhEjXYds3L-gZFqR0d0X61YyCReY5geJJGdM0";
 
 router.get('/bing', async (req, res) => {
     const prompt = req.query.prompt;
@@ -13,15 +11,22 @@ router.get('/bing', async (req, res) => {
     }
 
     try {
-        const data = await bing(prompt, cookie, key);
+        // Make a request to the external API
+        const response = await axios.get(`http://nova.hidencloud.com:25710/api/search?prompt=${encodeURIComponent(prompt)}`);
+        
+        // Modify the response to change the author
+        const data = response.data;
+        data.author = "Jerome";
+
+        // Send the modified response
         res.json({
-            success: true,
-            author: "Jerome",
+            success: data.success,
+            author: data.author,
             result: data.result
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'An error occurred while fetching data from Bing.' });
+        res.status(500).json({ error: 'An error occurred while fetching data from the external API.' });
     }
 });
 

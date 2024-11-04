@@ -98,6 +98,9 @@ app.get('/service-list', (req, res) => {
 const bingRouter = require('./api/bing').router;
 app.use('/service/api', bingRouter); // Route to access Bing API as /service/api/bing
 
+const spotifyRouter = require('./api/spotify').router;
+app.use('/service/api', spotifyRouter);
+
 const geminiRouter = require('./api/gemini').router;
 app.use('/service/api', geminiRouter); // Route to access Gemini API as /service/api/gemini
 

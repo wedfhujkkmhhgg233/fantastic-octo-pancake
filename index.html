@@ -1,206 +1,298 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title"></title>
-  <link rel="shortcut icon" href="https://graph.facebook.com/100092668630167/picture?height=720&width=720&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662" type="image/x-icon">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jerome Rest API Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #e2e8f0;
+            --primary-color: #3b82f6;
+            --secondary-color: #1e293b;
+            --accent-color: #f59e0b;
+            --hover-color: #2563eb;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            background-color: var(--secondary-color);
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            cursor: pointer;
+        }
+
+        .nav-list {
+            display: none;
+            list-style-type: none;
+        }
+
+        .nav-list.open {
+            display: block;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        header {
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .description {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .clock {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+        }
+
+        .category {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .endpoint {
+            background-color: var(--secondary-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .endpoint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .endpoint-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .endpoint-action {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .endpoint-action:hover {
+            background-color: var(--hover-color);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                padding: 1rem;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .description {
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="loader-container" id="loader">
-    <div class="loader"></div>
-  </div>
+    <nav class="sidebar">
+        <div class="logo" id="logo">
+            Jerome Rest API
+            <i class="fas fa-bars"></i>
+        </div>
+        <ul class="nav-list" id="category-nav">
+            <!-- Category links will be dynamically added here -->
+        </ul>
+    </nav>
 
-  <div class="content" id="content">
-    <main>
-      <aside class="sidebar" data-sidebar>
-        <div class="sidebar-info">
-          <figure class="avatar-box">
-            <img src="https://graph.facebook.com/100092668630167/picture?height=720&width=720&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662" alt="Service" width="80">
-          </figure>
+    <main class="main-content">
+        <header>
+            <h1>API Documentation</h1>
+            <div class="description">
+                Welcome to Jerome's RESTful API Documentation
+            </div>
+            <div id="MyClockDisplay" class="clock"></div>
+        </header>
 
-          <div class="info-content">
-            <h1 class="name" id="service-name"></h1>
-            <p class="title" id="service-description"></p>
-          </div>
-
-          <button class="info_more-btn" data-sidebar-btn>
-            <span>Show Contacts</span>
-            <ion-icon name="chevron-down"></ion-icon>
-          </button>
+        <div id="api-content">
+            <!-- API categories and endpoints will be dynamically added here -->
         </div>
 
-        <div class="sidebar-info_more">
-          <div class="separator"></div>
-
-          <ul class="contacts-list">
-            <li class="contact-item">
-              <div class="icon-box">
-                <ion-icon name="mail-outline"></ion-icon>
-              </div>
-              <div class="contact-info">
-                <p class="contact-title">Email</p>
-                <a href="#" id="email-link" class="contact-link"></a>
-              </div>
-            </li>
-
-            <li class="contact-item">
-              <div class="icon-box">
-                <ion-icon name="phone-portrait-outline"></ion-icon>
-              </div>
-              <div class="contact-info">
-                <p class="contact-title">Phone</p>
-                <a href="#" id="phone-link" class="contact-link"></a>
-              </div>
-            </li>
-
-            <li class="contact-item">
-              <div class="icon-box">
-                <ion-icon name="calendar-outline"></ion-icon>
-              </div>
-              <div class="contact-info">
-                <p class="contact-title">Birthday</p>
-                <time id="birthday"></time>
-              </div>
-            </li>
-
-            <li class="contact-item">
-              <div class="icon-box">
-                <ion-icon name="location-outline"></ion-icon>
-              </div>
-              <div class="contact-info">
-                <p class="contact-title">Location</p>
-                <address id="location"></address>
-              </div>
-            </li>
-          </ul>
-
-          <div class="separator"></div>
-
-          <ul class="social-list">
-            <li class="social-item">
-              <a href="#" id="facebook-link" class="social-link">
-                <ion-icon name="logo-facebook"></ion-icon>
-              </a>
-            </li>
-
-            <li class="social-item">
-              <a href="#" id="github-link" class="social-link">
-                <ion-icon name="logo-github"></ion-icon>
-              </a>
-            </li>
-
-            <li class="social-item">
-              <a href="#" id="twitter-link" class="social-link">
-                <ion-icon name="logo-twitter"></ion-icon>
-              </a>
-            </li>
-
-            <li class="social-item">
-              <a href="#" id="linkedin-link" class="social-link">
-                <ion-icon name="logo-linkedin"></ion-icon>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </aside>
-
-      <div class="main-content">
-        <nav class="navbar">
-          <ul class="navbar-list">
-            <li class="navbar-item">
-              <button class="navbar-link active" data-nav-link>About</button>
-            </li>
-            <li class="navbar-item">
-              <button class="navbar-link" data-nav-link>Services</button>
-            </li>
-          </ul>
-        </nav>
-
-        <article class="about active" data-page="about">
-          <header>
-            <h2 class="h2 article-title" id="about-title"></h2>
-          </header>
-
-          <section class="about-text">
-            <p id="about-text-1"></p>
-            <p id="about-text-2"></p>
-          </section>
-
-          <section class="service">
-            <h3 class="h3 service-title">Service Statistics</h3>
-            <div class="service-list">
-              <div class="service-item">
-                <div class="service-content-box">
-                  <div class="service-icon">
-                    <img src="images/rest-api.svg" alt="Service Icon" class="service-svg">
-                  </div>
-                  <div class="service-text-wrapper">
-                    <h4 class="h4 service-item-title">Total Services</h4>
-                    <p class="service-item-text" id="total-services">Loading...</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="service-item">
-                <div class="service-content-box">
-                  <div class="service-icon">
-                    <img src="images/category.svg" alt="Category Icon" class="service-svg">
-                  </div>
-                  <div class="service-text-wrapper">
-                    <h4 class="h4 service-item-title">Available Categories</h4>
-                    <p class="service-item-text" id="total-categories">Loading...</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </article>
-
-        <article class="portfolio" data-page="services">
-          <header>
-            <h2 class="h2 article-title">Services</h2>
-          </header>
-
-          <section class="projects">
-            <ul class="filter-list" id="service-category-filter">
-              <li class="filter-item">
-                <button class="active" data-service-filter-btn>All</button>
-              </li>
-            </ul>
-
-            <div class="filter-select-box">
-              <button class="filter-select" data-select>
-                <div class="select-value" data-selecct-value>Select category</div>
-                <div class="select-icon">
-                  <ion-icon name="chevron-down"></ion-icon>
-                </div>
-              </button>
-
-              <ul class="select-list" id="service-category-select">
-                <li class="select-item">
-                  <button data-select-item>All</button>
-                </li>
-              </ul>
-            </div>
-
-            <ul class="project-list" id="service-list">
-              <!-- Service items will be dynamically added here -->
-            </ul>
-          </section>
-        </article>
-      </div>
+        <footer>
+            <p>&copy; 2024 Jerome Jamis. All rights reserved.</p>
+        </footer>
     </main>
-  </div>
 
-  <script src="js/script.js"></script>
-  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script>
+        document.querySelector('#category-nav').classList.remove('open');
+       
+        const logo = document.querySelector('.logo');
+
+        logo.addEventListener('click', () => {
+            document.querySelector('#category-nav').classList.toggle('open');
+        });
+
+        function showTime() {
+            const date = new Date();
+            let h = date.getHours();
+            let m = date.getMinutes();
+            let s = date.getSeconds();
+            h = h < 10 ? "0" + h : h;
+            m = m < 10 ? "0" + m : m;
+            s = s < 10 ? "0" + s : s;
+            const time = h + ":" + m + ":" + s;
+            document.getElementById("MyClockDisplay").innerText = time;
+            setTimeout(showTime, 1000);
+        }
+
+        showTime();
+
+        async function fetchApiEndpoints() {
+            const response = await fetch('https://jerome-web.onrender.com/service-list'); // Update with your actual API URL
+            return response.json();
+        }
+
+        function populateApiContent(endpoints) {
+            const apiContent = document.getElementById('api-content');
+            const categoryNav = document.getElementById('category-nav');
+            const categories = {};
+
+            endpoints.forEach(endpoint => {
+                if (!categories[endpoint.category]) {
+                    categories[endpoint.category] = [];
+                }
+                categories[endpoint.category].push(endpoint);
+            });
+
+            for (const [category, apiList] of Object.entries(categories)) {
+                const categoryId = category.toLowerCase().replace(/ /g, '-');
+
+                // Add category to navigation
+                const navItem = document.createElement('li');
+                navItem.className = 'nav-item';
+                navItem.innerHTML = `<a href="#${categoryId}" class="nav-link">${category}</a>`;
+                categoryNav.appendChild(navItem);
+
+                // Create category section
+                const categorySection = document.createElement('section');
+                categorySection.className = 'category';
+                categorySection.id = categoryId;
+                categorySection.innerHTML = `<h2>${category}</h2>`;
+
+                apiList.forEach(api => {
+                    const endpoint = document.createElement('div');
+                    endpoint.className = 'endpoint';
+                    endpoint.innerHTML = `
+                        <div class="endpoint-header">
+                            <span class="endpoint-name">${api.name}</span>
+                            <span class="endpoint-method">${api.link[0]}</span>
+                        </div>
+                        <a href="/service${api.link[0]}" class="endpoint-action">Get</a>
+                        <a href="/service${api.link[0]}" class="endpoint-action">Try it now</a>
+                    `;
+                    categorySection.appendChild(endpoint);
+                });
+
+                apiContent.appendChild(categorySection);
+            }
+        }
+
+        fetchApiEndpoints().then(endpoints => {
+            populateApiContent(endpoints);
+        }).catch(error => {
+            console.error('Error fetching API endpoints:', error);
+        });
+    </script>
 </body>
 </html>

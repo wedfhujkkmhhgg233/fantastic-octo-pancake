@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jerome Rest API Documentation</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         :root {
             --bg-color: #0f172a;
@@ -34,6 +36,7 @@
             max-width: 800px;
             width: 100%;
             padding: 2rem;
+            animation: fadeIn 1s ease-in-out;
         }
 
         header {
@@ -54,7 +57,7 @@
             opacity: 0.8;
         }
 
-        .clock {
+        .clock, .ping {
             font-size: 0.9rem;
             color: var(--primary-color);
         }
@@ -123,6 +126,7 @@
             <h1>Jerome Rest API Documentation</h1>
             <div class="description">Welcome to Jerome's RESTful API Documentation</div>
             <div id="MyClockDisplay" class="clock"></div>
+            <div id="PingDisplay" class="ping"></div>
         </header>
 
         <div id="api-content">
@@ -130,6 +134,8 @@
         </div>
 
         <footer>
+            <p id="category-count"></p>
+            <p id="endpoint-count"></p>
             <p>&copy; 2024 Jerome Jamis. All rights reserved.</p>
         </footer>
     </main>
@@ -144,25 +150,41 @@
             m = m < 10 ? "0" + m : m;
             s = s < 10 ? "0" + s : s;
             const time = h + ":" + m + ":" + s;
-            document.getElementById("MyClockDisplay").innerText = time;
+            document.getElementById("MyClockDisplay").innerText = `Current Time: ${time}`;
             setTimeout(showTime, 1000);
         }
         showTime();
 
+        async function fetchPing() {
+            const startTime = Date.now();
+            try {
+                await fetch('/');
+                const endTime = Date.now();
+                const ping = endTime - startTime;
+                document.getElementById('PingDisplay').innerText = `Server Ping: ${ping} ms`;
+            } catch (error) {
+                document.getElementById('PingDisplay').innerText = `Ping: Error`;
+            }
+            setTimeout(fetchPing, 1000);
+        }
+        fetchPing();
+
         async function fetchApiEndpoints() {
-            const response = await fetch('/service-list');
+            const response = await fetch('/service/service-list');
             return response.json();
         }
 
         function populateApiContent(endpoints) {
             const apiContent = document.getElementById('api-content');
             const categories = {};
+            let totalEndpoints = 0;
 
             endpoints.forEach(endpoint => {
                 if (!categories[endpoint.category]) {
                     categories[endpoint.category] = [];
                 }
                 categories[endpoint.category].push(endpoint);
+                totalEndpoints++;
             });
 
             for (const [category, apiList] of Object.entries(categories)) {
@@ -181,8 +203,8 @@
                         <p>${api.description}</p>
                         <span>Author: ${api.author}</span>
                         <div>
-                            <a href="${api.link[0]}" class="endpoint-action">Get</a>
-                            <a href="${api.link[0]}" class="endpoint-action">Try it now</a>
+                            <a href="${api.link[0].replace('/api/', '/service/api/')}" class="endpoint-action">Get</a>
+                            <a href="${api.link[0].replace('/api/', '/service/api/')}" class="endpoint-action">Try it now</a>
                         </div>
                     `;
                     categorySection.appendChild(endpoint);
@@ -190,6 +212,9 @@
 
                 apiContent.appendChild(categorySection);
             }
+
+            document.getElementById('category-count').innerText = `Total Categories: ${Object.keys(categories).length}`;
+            document.getElementById('endpoint-count').innerText = `Total Endpoints: ${totalEndpoints}`;
         }
 
         fetchApiEndpoints()

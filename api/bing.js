@@ -1,12 +1,12 @@
 const express = require('express');
-const { bing } = require('nayan-bing-api');
+const { bing } = require('./node_modules/nayan-bing-api/src'); // Updated import path
 
 const router = express.Router();
-const key = "Nayan"; 
+const key = "Nayan";
 const cookie = "1d6krfybFWYR3cxvOkhT9Tnos4wDZ61Ark2DbT1HuKpDcebTJ55KqxvVg_xvs8WuFalZQBCZ9zB6j_nHaNyt2DKsarkKDMJZeTepeWetPCmShmJ_KlKgC2L9xI92NKlt_XjFnXzwryEBZYDU4vg0-BnYBeEtVREDzRENgJOttD4mc-7h_4xgB6rko2FYBculfq42bCPVhEjXYds3L-gZFqR0d0X61YyCReY5geJJGdM0";
 
 router.get('/bing', async (req, res) => {
-    const prompt = req.query.prompt; 
+    const prompt = req.query.prompt;
 
     if (!prompt) {
         return res.status(400).json({ error: 'Prompt is required' });
@@ -17,7 +17,7 @@ router.get('/bing', async (req, res) => {
         res.json({
             success: true,
             author: "Jerome",
-            result: data.result 
+            result: data.result
         });
     } catch (error) {
         console.error(error);
@@ -34,4 +34,3 @@ const serviceMetadata = {
 };
 
 module.exports = { router, serviceMetadata };
-                                

@@ -1,5 +1,5 @@
-const express = require('express');
-const UltimateGuitar = require('ultimate-guitar');
+import express from 'express';
+import UltimateGuitar from 'ultimate-guitar';
 
 const router = express.Router();
 
@@ -40,4 +40,4 @@ const serviceMetadata = {
     link: ["/api/chords?title="]
 };
 
-module.exports = { router, serviceMetadata };
+export { router, serviceMetadata }; // Use export instead of module.exports

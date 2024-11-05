@@ -1,5 +1,5 @@
-const express = require('express');
-const { alldown } = require("nayan-media-downloader");
+import express from 'express';
+import { alldown } from 'nayan-media-downloader';
 
 const router = express.Router();
 
@@ -31,4 +31,4 @@ const serviceMetadata = {
     link: ["/api/alldl?url="]
 };
 
-module.exports = { router, serviceMetadata };
+export { router, serviceMetadata }; // Use export instead of module.exports

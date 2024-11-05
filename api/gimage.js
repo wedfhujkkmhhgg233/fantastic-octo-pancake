@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.get('/gimage', async (req, res) => {
     const query = req.query.query;
+    const count = parseInt(req.query.count) || 6; // Default to 6 if count is not provided
 
     if (!query) {
         return res.status(400).json({
@@ -26,7 +27,7 @@ router.get('/gimage', async (req, res) => {
         }
 
         res.setHeader('Content-Type', 'application/json');
-        res.send(JSON.stringify(response.slice(0, 6), null, 2)); // Limit to 6 results, pretty-printed
+        res.send(JSON.stringify(response.slice(0, count), null, 2)); // Limit results based on count parameter
 
     } catch (error) {
         console.error("Error searching for images:", error);
@@ -40,7 +41,7 @@ const serviceMetadata = {
     name: "Google Image Search",
     description: "Search for images using Google",
     category: "tools",
-    link: ["/api/gimage?query=cat"]
+    link: ["/api/gimage?query=dog&count=5"]
 };
 
 module.exports = { router, serviceMetadata };

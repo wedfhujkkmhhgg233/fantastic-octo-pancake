@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { router as aiRouter } from './api/ai.js'; // Import AI router
+import { router as aiRouter } from './api/ai.js'; // Import AI router with .js extension
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -89,7 +89,7 @@ app.get('/service-list', async (req, res) => {
             for (const file of apiFiles) {
                 if (path.extname(file) === '.js') {
                     // Dynamically import the JS file
-                    const module = await import(path.join(apiDir, file).replace(/\.js$/, ''));
+                    const module = await import(path.join(apiDir, file).replace(/\.js$/, '.js'));
                     if (module.serviceMetadata) {
                         services.push(module.serviceMetadata); // Add the service metadata to the list
                     } else {
@@ -108,7 +108,7 @@ app.get('/service-list', async (req, res) => {
     }
 });
 
-// Load API routes for various services
+// Load API routes for various services with .js extension
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 

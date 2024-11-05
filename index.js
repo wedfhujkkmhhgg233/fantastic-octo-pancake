@@ -101,6 +101,9 @@ app.use('/service/api', bingRouter); // Route to access Bing API as /service/api
 const spotifyRouter = require('./api/spotify').router;
 app.use('/service/api', spotifyRouter);
 
+const lyricsRouter = require('./api/lyrics').router;
+app.use('/service/api', lyricsRouter);
+
 const geminiRouter = require('./api/gemini').router;
 app.use('/service/api', geminiRouter); // Route to access Gemini API as /service/api/gemini
 

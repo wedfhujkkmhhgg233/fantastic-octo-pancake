@@ -101,6 +101,9 @@ app.use('/service/api', bingRouter); // Route to access Bing API as /service/api
 const gimageRouter = require('./api/gimage').router;
 app.use('/service/api', gimageRouter);
 
+const playstoreRouter = require('./api/playstore').router;
+app.use('/service/api', playstoreRouter);
+
 const spotifyRouter = require('./api/spotify').router;
 app.use('/service/api', spotifyRouter);
 

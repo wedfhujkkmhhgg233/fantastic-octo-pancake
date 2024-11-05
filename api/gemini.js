@@ -2,7 +2,8 @@ const express = require('express');
 const Gemini = require('@onepunya/ez-gemini');
 
 const router = express.Router();
-const gemini = new Gemini();
+const apiKey = 'AIzaSyDF3ZSiDZt9Rg_0eeoPDDYozDu3UvoutNw';
+const gemini = new Gemini(apiKey); // Using your personal API key
 
 router.get('/gemini', async (req, res) => {
     const { ask, imgurl } = req.query;
@@ -34,7 +35,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Gemini API Service for text and image processing",
     category: "AI Services",
-    link: ["/api/gemini?ask=&imgurl="]
+    link: ["/service/api/gemini?ask=&imgurl="]
 };
 
 // Export the router and metadata

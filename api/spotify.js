@@ -1,7 +1,7 @@
-const express = require('express');
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+import express from 'express';
+import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
 
@@ -33,20 +33,20 @@ router.get('/spotify-download', async (req, res) => {
 
     try {
         // First API: Get the track URL
-        const spotifyApiUrl = `https://spotify-play-iota.vercel.app/spotify?query=${query}`;
+        const spotifyApiUrl = `https://spotify-play-iota.vercel.app/spotify?query=${encodeURIComponent(query)}`;
         const trackResponse = await axios.get(spotifyApiUrl);
 
-        if (!trackResponse.data || !trackResponse.data.trackURLs) {
+        if (!trackResponse.data || !trackResponse.data.trackURLs || trackResponse.data.trackURLs.length === 0) {
             throw new Error('Invalid data from the Spotify API');
         }
 
         const firstTrackUrl = trackResponse.data.trackURLs[0];
 
         // Second API: Get track details and download URL
-        const trackDetailsUrl = `https://joshweb.click/api/spotify2?q=${firstTrackUrl}`;
+        const trackDetailsUrl = `https://joshweb.click/api/spotify2?q=${encodeURIComponent(firstTrackUrl)}`;
         const trackDetails = await axios.get(trackDetailsUrl);
 
-        if (!trackDetails.data || !trackDetails.data.result) {
+        if (!trackDetails.data || !trackDetails.data.result || !trackDetails.data.result.download_url) {
             throw new Error('Invalid data from the track details API');
         }
 
@@ -62,6 +62,12 @@ router.get('/spotify-download', async (req, res) => {
 
         response.data.pipe(mp3Stream);
 
+        // Error handling for stream
+        mp3Stream.on('error', (err) => {
+            console.error('Stream error:', err);
+            res.status(500).json({ error: 'Error writing to file' });
+        });
+
         // Set file expiration (if needed)
         setTimeout(() => {
             if (fs.existsSync(mp3Path)) {
@@ -70,7 +76,6 @@ router.get('/spotify-download', async (req, res) => {
         }, 180000); // 3 minutes
 
         mp3Stream.on('finish', () => {
-            // Update to your website's base URL
             const fileUrl = `https://jerome-web.gleeze.com/public/${selectedFileName}`;
             res.json({ downloadUrl: fileUrl });
         });
@@ -90,4 +95,4 @@ const serviceMetadata = {
     link: ["/api/spotify-download?query="]
 };
 
-module.exports = { router, serviceMetadata };
+export { router, serviceMetadata };

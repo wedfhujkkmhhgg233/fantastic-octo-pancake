@@ -127,6 +127,9 @@ app.use('/service/api', lyricsRouter);
 import { router as chordsRouter } from './api/chords.js';
 app.use('/service/api', chordsRouter);
 
+import { router as wordnikRouter } from './api/wordnik.js';
+app.use('/service/api', wordnikRouter);
+
 import { router as searchRouter } from './api/search.js';
 app.use('/service/api', searchRouter);
 

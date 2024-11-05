@@ -39,6 +39,7 @@ router.get('/gimage', async (req, res) => {
 
 const serviceMetadata = {
     name: "Google Image Search",
+    author: "Jerome",
     description: "Search for images using Google",
     category: "tools",
     link: ["/api/gimage?query=dog&count=5"]

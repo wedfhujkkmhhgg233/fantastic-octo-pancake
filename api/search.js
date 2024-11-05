@@ -37,6 +37,7 @@ router.get('/search', async (req, res) => {
 
 const serviceMetadata = {
     name: "DuckDuckGo Search",
+    author: "Jerome",
     description: "Search for a topic on DuckDuckGo",
     category: "tools",
     link: ["/api/search?query=who%20is%20Jose%20Rizal"]

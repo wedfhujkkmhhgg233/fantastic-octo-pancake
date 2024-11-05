@@ -1,5 +1,5 @@
-const express = require('express');
-const google = require('googlethis');
+import express from 'express';
+import google from 'googlethis';
 
 const router = express.Router();
 
@@ -45,4 +45,5 @@ const serviceMetadata = {
     link: ["/api/gimage?query=dog&count=5"]
 };
 
-module.exports = { router, serviceMetadata };
+// Export the router and metadata
+export { router, serviceMetadata }; // Use export instead of module.exports

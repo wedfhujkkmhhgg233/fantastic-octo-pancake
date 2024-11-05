@@ -4,50 +4,42 @@ const duckduckgoSearch = require('duckduckgo-search');
 const router = express.Router();
 
 router.get('/search', async (req, res) => {
-    const query = req.query.textQuery;
+    const query = req.query.query;
 
     if (!query) {
-        return res.status(400).json({ 
-            error: "Please provide ?textQuery= parameter." 
+        return res.status(400).json({
+            error: "Please add ?query=your_search_query"
         });
     }
 
     try {
-        const textResults = [];
-        const imageResults = [];
-
-        // Perform text search
+        const results = [];
         for await (const result of duckduckgoSearch.text(query)) {
-            textResults.push(result); // Push raw result directly
+            results.push(result); // Directly push the result as-is from the package
         }
 
-        // Perform image search
-        for await (const result of duckduckgoSearch.images(query)) {
-            imageResults.push(result); // Push raw result directly
+        if (results.length === 0) {
+            return res.status(404).json({
+                error: "No search results found"
+            });
         }
 
-        // Return response with exact results
-        res.json({
-            success: true,
-            author: "Jerome",
-            textResults: textResults,
-            imageResults: imageResults
-        });
+        res.setHeader('Content-Type', 'application/json');
+        res.send(JSON.stringify(results, null, 2)); // Pretty-print JSON output
 
     } catch (error) {
         console.error("Error performing search:", error);
-        res.status(500).json({ 
-            error: "Failed to perform search" 
+        res.status(500).json({
+            error: "Failed to perform search"
         });
     }
 });
 
 const serviceMetadata = {
-    name: "DuckDuckGo Combined Search",
-    author: "Jerome",
-    description: "Search for both text and images on DuckDuckGo",
+    name: "DuckDuckGo Search",
+    description: "Search for a topic on DuckDuckGo",
     category: "tools",
-    link: ["/api/search?textQuery=example%20keywords"]
+    link: ["/api/search?query=who%20is%20Jose%20Rizal"]
 };
 
 module.exports = { router, serviceMetadata };

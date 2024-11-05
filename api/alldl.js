@@ -1,5 +1,7 @@
 import express from 'express';
-import { alldown } from 'nayan-media-downloader';
+import pkg from 'nayan-media-downloader';
+
+const { alldown } = pkg; // Destructure alldown from the imported module
 
 const router = express.Router();
 

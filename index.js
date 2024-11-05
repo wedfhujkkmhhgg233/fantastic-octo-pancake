@@ -114,6 +114,10 @@ app.get('/downloader', (req, res) => {
     res.sendFile(path.join(__dirname, 'downloader.html'));
 });
 
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
 // Additional service routes
 app.get('/sim', (req, res) => {
     res.sendFile(path.join(__dirname, 'sim.html'));

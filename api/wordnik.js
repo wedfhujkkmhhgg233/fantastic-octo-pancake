@@ -1,6 +1,6 @@
 import express from 'express';
 import axios from 'axios';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 
 const router = express.Router();
 
@@ -22,28 +22,25 @@ router.get('/wordnik', async (req, res) => {
 
         // Scrape definitions
         const definitions = [];
-        $('.word-module .definition').each((_, element) => {
+        $('.definitions .definition').each((_, element) => {
             definitions.push($(element).text().trim());
         });
 
-        // Scrape example sentences
+        // Scrape examples
         const examples = [];
         $('.examples .example').each((_, element) => {
-            examples.push($(element).find('.text').text().trim());
+            examples.push($(element).text().trim());
         });
 
-        // Scrape related words (e.g., synonyms, antonyms)
-        const relatedWords = [];
-        $('.related-word').each((_, element) => {
-            relatedWords.push($(element).text().trim());
-        });
+        // Scrape word origin if available
+        const wordOrigin = $('.etymology').text().trim() || null;
 
         // Create a structured response object
         const wordData = {
             word: word,
             definitions: definitions,
             examples: examples,
-            relatedWords: relatedWords
+            origin: wordOrigin
         };
 
         // Send the scraped data as JSON
@@ -59,9 +56,9 @@ router.get('/wordnik', async (req, res) => {
 });
 
 const serviceMetadata = {
-    name: "Wordnik",
+    name: "Wordnik Scraper",
     author: "Jerome",
-    description: "Find word details from Wordnik",
+    description: "Scrape word details from Wordnik",
     category: "dictionary",
     link: ["/api/wordnik?word=dog"]
 };

@@ -1,5 +1,5 @@
-const express = require('express');
-const duckduckgoSearch = require('duckduckgo-search');
+import express from 'express';
+import { text } from 'duckduckgo-search';
 
 const router = express.Router();
 
@@ -14,8 +14,8 @@ router.get('/search', async (req, res) => {
 
     try {
         const results = [];
-        for await (const result of duckduckgoSearch.text(query)) {
-            results.push(result); // Directly push the result as-is from the package
+        for await (const result of text(query)) {
+            results.push(result);
         }
 
         if (results.length === 0) {
@@ -25,7 +25,7 @@ router.get('/search', async (req, res) => {
         }
 
         res.setHeader('Content-Type', 'application/json');
-        res.send(JSON.stringify(results, null, 2)); // Pretty-print JSON output
+        res.send(JSON.stringify(results, null, 2));
 
     } catch (error) {
         console.error("Error performing search:", error);
@@ -43,4 +43,4 @@ const serviceMetadata = {
     link: ["/api/search?query=who%20is%20Jose%20Rizal"]
 };
 
-module.exports = { router, serviceMetadata };
+export { router, serviceMetadata };

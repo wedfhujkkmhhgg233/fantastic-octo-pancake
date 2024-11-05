@@ -1,3 +1,4 @@
+// Import dependencies
 import express from 'express';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
@@ -8,6 +9,7 @@ const router = express.Router();
 router.get('/wordnik', async (req, res) => {
     const { word } = req.query;
 
+    // Check if the word query parameter is provided
     if (!word) {
         return res.status(400).json({
             error: "Please add ?word=your_word"
@@ -23,13 +25,15 @@ router.get('/wordnik', async (req, res) => {
         // Scrape definitions
         const definitions = [];
         $('.definitions .definition').each((_, element) => {
-            definitions.push($(element).text().trim());
+            const definition = $(element).text().trim();
+            if (definition) definitions.push(definition);
         });
 
         // Scrape examples
         const examples = [];
         $('.examples .example').each((_, element) => {
-            examples.push($(element).text().trim());
+            const example = $(element).text().trim();
+            if (example) examples.push(example);
         });
 
         // Scrape word origin if available
@@ -38,8 +42,8 @@ router.get('/wordnik', async (req, res) => {
         // Create a structured response object
         const wordData = {
             word: word,
-            definitions: definitions,
-            examples: examples,
+            definitions,
+            examples,
             origin: wordOrigin
         };
 
@@ -48,13 +52,14 @@ router.get('/wordnik', async (req, res) => {
         res.json(wordData);
 
     } catch (error) {
-        console.error("Error scraping Wordnik:", error);
+        console.error("Error scraping Wordnik:", error.message);
         res.status(500).json({
             error: "Failed to retrieve word information from Wordnik"
         });
     }
 });
 
+// Metadata for the Wordnik Scraper service
 const serviceMetadata = {
     name: "Wordnik Scraper",
     author: "Jerome",

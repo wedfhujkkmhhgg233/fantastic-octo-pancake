@@ -1,5 +1,5 @@
-const express = require('express');
-const ai = require('unlimited-ai'); // Importing your AI library
+import express from 'express';
+import ai from 'unlimited-ai'; // Importing your AI library
 
 const router = express.Router();
 
@@ -65,4 +65,4 @@ const serviceMetadata = {
     link: ["/api/ai?model=<model>&system=<system>&question=<question>"]
 };
 
-module.exports = { router, serviceMetadata };
+export { router, serviceMetadata }; // Use export instead of module.exports

@@ -48,7 +48,7 @@ router.get('/wordnik', async (req, res) => {
 
         // Create a structured response object
         const wordData = {
-            word: word,
+            word,
             definitions,
             examples,
             origin: wordOrigin

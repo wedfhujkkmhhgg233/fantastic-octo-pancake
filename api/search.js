@@ -1,8 +1,7 @@
 const express = require('express');
-const { Duck } = require('goduckduckgo');
+const { search, SafeSearchType } = require('duckduckgogogo');
 
 const router = express.Router();
-const d = new Duck();
 
 router.get('/search', async (req, res) => {
     const query = req.query.query;
@@ -14,7 +13,10 @@ router.get('/search', async (req, res) => {
     }
 
     try {
-        const searchResults = await d.search(query);
+        const searchResults = await search(query, {
+            safeSearch: SafeSearchType.STRICT,
+            count: 10
+        });
 
         if (!searchResults || searchResults.length === 0) {
             return res.status(404).json({ 

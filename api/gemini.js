@@ -1,5 +1,5 @@
-const express = require('express');
-const Gemini = require('@onepunya/ez-gemini');
+import express from 'express';
+import Gemini from '@onepunya/ez-gemini';
 
 const router = express.Router();
 const apiKey = 'AIzaSyDF3ZSiDZt9Rg_0eeoPDDYozDu3UvoutNw';
@@ -39,4 +39,4 @@ const serviceMetadata = {
 };
 
 // Export the router and metadata
-module.exports = { router, serviceMetadata };
+export { router, serviceMetadata }; // Use export instead of module.exports

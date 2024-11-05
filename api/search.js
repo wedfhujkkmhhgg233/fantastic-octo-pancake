@@ -1,5 +1,5 @@
 const express = require('express');
-const { search, SafeSearchType } = require('duckduckgogogo');
+const duckduckgoSearch = require('duckduckgo-search');
 
 const router = express.Router();
 
@@ -13,35 +13,35 @@ router.get('/search', async (req, res) => {
     }
 
     try {
-        const searchResults = await search(query, {
-            safeSearch: SafeSearchType.STRICT,
-            count: 10
-        });
+        const results = [];
+        for await (const result of duckduckgoSearch.text(query)) {
+            results.push({
+                title: result.title,
+                description: result.description,
+                url: result.url,
+                source: result.hostname || "DuckDuckGo"
+            });
+        }
 
-        if (!searchResults || searchResults.length === 0) {
+        if (results.length === 0) {
             return res.status(404).json({ 
                 error: "No search results found" 
             });
         }
 
-        // Extract the top 5 results or fewer if there are not enough results
-        const formattedResults = searchResults.slice(0, 5).map(result => ({
-            title: result.title,
-            description: result.description.replace(/<\/?b>/g, ""), // Remove both opening and closing b tags
-            source: result.hostname,
-            url: result.url
-        }));
+        // Limit to the first 5 results
+        const limitedResults = results.slice(0, 5);
 
         res.json({
             success: true,
             author: "Jerome",
-            results: formattedResults
+            results: limitedResults
         });
-        
+
     } catch (error) {
         console.error("Error performing search:", error);
         res.status(500).json({ 
-            error: "Failed to perform search"
+            error: "Failed to perform search" 
         });
     }
 });

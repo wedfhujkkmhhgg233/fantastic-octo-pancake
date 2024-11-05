@@ -69,7 +69,7 @@ app.get('/service-list', async (req, res) => {
     const apiDir = path.join(__dirname, 'api');
 
     try {
-        // Check if services directory exists
+        // Read services directory for JSON files
         if (fs.existsSync(servicesDir)) {
             const files = fs.readdirSync(servicesDir);
             files.forEach(file => {
@@ -83,14 +83,15 @@ app.get('/service-list', async (req, res) => {
             console.warn('Services directory not found:', servicesDir);
         }
 
-        // Check if api directory exists
+        // Read api directory for API service metadata
         if (fs.existsSync(apiDir)) {
             const apiFiles = fs.readdirSync(apiDir);
             for (const file of apiFiles) {
                 if (path.extname(file) === '.js') {
-                    const { serviceMetadata } = require(path.join(apiDir, file)); // Import each JS file
-                    if (serviceMetadata) {
-                        services.push(serviceMetadata); // Add the service metadata to the list
+                    // Dynamically import the JS file
+                    const module = await import(path.join(apiDir, file).replace(/\.js$/, ''));
+                    if (module.serviceMetadata) {
+                        services.push(module.serviceMetadata); // Add the service metadata to the list
                     } else {
                         console.warn(`No service metadata found in ${file}`);
                     }
@@ -107,9 +108,9 @@ app.get('/service-list', async (req, res) => {
     }
 });
 
-// Load API routes for Bing, Gemini, Alldl, and AI services
+// Load API routes for various services
 import { router as bingRouter } from './api/bing.js';
-app.use('/service/api', bingRouter); // Route to access Bing API as /service/api/bing
+app.use('/service/api', bingRouter);
 
 import { router as gimageRouter } from './api/gimage.js';
 app.use('/service/api', gimageRouter);
@@ -127,15 +128,15 @@ import { router as chordsRouter } from './api/chords.js';
 app.use('/service/api', chordsRouter);
 
 import { router as searchRouter } from './api/search.js';
-app.use('/service/api', searchRouter); // Access DuckDuckGo search API at /service/api/search
+app.use('/service/api', searchRouter);
 
 import { router as geminiRouter } from './api/gemini.js';
-app.use('/service/api', geminiRouter); // Route to access Gemini API as /service/api/gemini
+app.use('/service/api', geminiRouter);
 
 import { router as alldlRouter } from './api/alldl.js';
-app.use('/service/api', alldlRouter); // Route to access Alldl API as /service/api/alldl
+app.use('/service/api', alldlRouter);
 
-app.use('/service/api', aiRouter); // Route to access AI API as /service/api/ai
+app.use('/service/api', aiRouter);
 
 // Route to serve downloader.html
 app.get('/downloader', (req, res) => {

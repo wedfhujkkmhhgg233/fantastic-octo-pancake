@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as citizendiumRouter } from './api/citizendium.js';
+app.use('/service/api', citizendiumRouter);
+
 import { router as wikihowRouter } from './api/wikihow.js';
 app.use('/service/api', wikihowRouter);
 

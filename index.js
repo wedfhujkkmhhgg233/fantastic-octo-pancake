@@ -1,12 +1,18 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const aiRouter = require('./api/ai').router; // Import AI router
+import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { router as aiRouter } from './api/ai.js'; // Import AI router
+
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Get the current directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Middleware to serve static files from the root directory
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(__dirname));
 
 // Middleware to parse JSON bodies
 app.use(express.json());
@@ -84,7 +90,7 @@ app.get('/service-list', (req, res) => {
 
             apiFiles.forEach(file => {
                 if (path.extname(file) === '.js') {
-                    const { serviceMetadata } = require(path.join(apiDir, file));
+                    const { serviceMetadata } = require(path.join(apiDir, file)); // Keep using CommonJS here
                     services.push(serviceMetadata);
                 }
             });
@@ -95,31 +101,31 @@ app.get('/service-list', (req, res) => {
 });
 
 // Load API routes for Bing, Gemini, Alldl, and AI services
-const bingRouter = require('./api/bing').router;
+import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter); // Route to access Bing API as /service/api/bing
 
-const gimageRouter = require('./api/gimage').router;
+import { router as gimageRouter } from './api/gimage.js';
 app.use('/service/api', gimageRouter);
 
-const playstoreRouter = require('./api/playstore').router;
+import { router as playstoreRouter } from './api/playstore.js';
 app.use('/service/api', playstoreRouter);
 
-const spotifyRouter = require('./api/spotify').router;
+import { router as spotifyRouter } from './api/spotify.js';
 app.use('/service/api', spotifyRouter);
 
-const lyricsRouter = require('./api/lyrics').router;
+import { router as lyricsRouter } from './api/lyrics.js';
 app.use('/service/api', lyricsRouter);
 
-const chordsRouter = require('./api/chords').router;
+import { router as chordsRouter } from './api/chords.js';
 app.use('/service/api', chordsRouter);
 
-const searchRouter = require('./api/search').router;
+import { router as searchRouter } from './api/search.js';
 app.use('/service/api', searchRouter); // Access DuckDuckGo search API at /service/api/search
 
-const geminiRouter = require('./api/gemini').router;
+import { router as geminiRouter } from './api/gemini.js';
 app.use('/service/api', geminiRouter); // Route to access Gemini API as /service/api/gemini
 
-const alldlRouter = require('./api/alldl').router;
+import { router as alldlRouter } from './api/alldl.js';
 app.use('/service/api', alldlRouter); // Route to access Alldl API as /service/api/alldl
 
 app.use('/service/api', aiRouter); // Route to access AI API as /service/api/ai
@@ -129,6 +135,7 @@ app.get('/downloader', (req, res) => {
     res.sendFile(path.join(__dirname, 'downloader.html'));
 });
 
+// Route to serve dashboard.html
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'dashboard.html'));
 });

@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as wiktionaryRouter } from './api/wiktionary.js';
+app.use('/service/api', wiktionaryRouter);
+
 import { router as gimageRouter } from './api/gimage.js';
 app.use('/service/api', gimageRouter);
 

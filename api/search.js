@@ -1,7 +1,8 @@
 const express = require('express');
-const DDG = require('duck-duck-scrape'); // Importing the DuckDuckGo library
+const { Duck } = require('goduckduckgo');
 
 const router = express.Router();
+const d = new Duck();
 
 router.get('/search', async (req, res) => {
     const query = req.query.query;
@@ -13,18 +14,16 @@ router.get('/search', async (req, res) => {
     }
 
     try {
-        const searchResults = await DDG.search(query, { 
-            safeSearch: DDG.SafeSearchType.STRICT 
-        });
+        const searchResults = await d.search(query);
 
-        if (!searchResults || !searchResults.results || searchResults.results.length === 0) {
+        if (!searchResults || searchResults.length === 0) {
             return res.status(404).json({ 
                 error: "No search results found" 
             });
         }
 
         // Extract the top 5 results or fewer if there are not enough results
-        const formattedResults = searchResults.results.slice(0, 5).map(result => ({
+        const formattedResults = searchResults.slice(0, 5).map(result => ({
             title: result.title,
             description: result.description.replace(/<\/?b>/g, ""), // Remove both opening and closing b tags
             source: result.hostname,
@@ -50,7 +49,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Search for a topic on DuckDuckGo",
     category: "tools",
-    link: ["/api/search?query=dog"]
+    link: ["/api/search?query=who%20is%20Jose%20Rizal"]
 };
 
 module.exports = { router, serviceMetadata };

@@ -107,6 +107,9 @@ app.use('/service/api', lyricsRouter);
 const chordsRouter = require('./api/chords').router;
 app.use('/service/api', chordsRouter);
 
+const searchRouter = require('./api/search').router;
+app.use('/service/api', searchRouter); // Access DuckDuckGo search API at /service/api/search
+
 const geminiRouter = require('./api/gemini').router;
 app.use('/service/api', geminiRouter); // Route to access Gemini API as /service/api/gemini
 

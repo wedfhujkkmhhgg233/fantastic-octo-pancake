@@ -35,7 +35,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Gemini API Service for text and image processing",
     category: "AI Services",
-    link: ["/service/api/gemini?ask=&imgurl="]
+    link: ["/api/gemini?ask=&imgurl="]
 };
 
 // Export the router and metadata

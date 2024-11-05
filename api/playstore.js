@@ -1,5 +1,5 @@
-const express = require('express');
-const gplay = require('google-play-scraper');
+import express from 'express';
+import gplay from 'google-play-scraper';
 
 const router = express.Router();
 
@@ -37,5 +37,4 @@ const serviceMetadata = {
     link: ["/api/playstore?term=Facebook"]
 };
 
-module.e
-xports = { router, serviceMetadata };
+export { router, serviceMetadata };

@@ -1,5 +1,7 @@
 import express from 'express';
-import { text } from 'duckduckgo-search';
+import pkg from 'duckduckgo-search';
+
+const { text } = pkg; // Destructure text from the imported module
 
 const router = express.Router();
 

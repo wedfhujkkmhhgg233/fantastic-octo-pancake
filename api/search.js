@@ -1,7 +1,4 @@
 import express from 'express';
-import pkg from 'duckduckgo-search';
-
-const { text } = pkg; // Destructure text from the imported module
 
 const router = express.Router();
 
@@ -15,16 +12,19 @@ router.get('/search', async (req, res) => {
     }
 
     try {
-        const results = [];
-        for await (const result of text(query)) {
-            results.push(result);
-        }
+        const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`);
+        const data = await response.json();
 
-        if (results.length === 0) {
+        if (!data || !data.RelatedTopics || data.RelatedTopics.length === 0) {
             return res.status(404).json({
                 error: "No search results found"
             });
         }
+
+        const results = data.RelatedTopics.map(item => ({
+            title: item.Text,
+            url: item.FirstURL
+        }));
 
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify(results, null, 2));

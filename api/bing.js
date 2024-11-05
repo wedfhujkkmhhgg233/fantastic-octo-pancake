@@ -1,5 +1,5 @@
-const express = require('express');
-const axios = require('axios');
+import express from 'express';
+import axios from 'axios';
 
 const router = express.Router();
 
@@ -30,6 +30,7 @@ router.get('/bing', async (req, res) => {
     }
 });
 
+// Service metadata for the Bing route
 const serviceMetadata = {
     name: "Imagine",
     author: "Jerome",
@@ -38,4 +39,4 @@ const serviceMetadata = {
     link: ["/api/bing?prompt="]
 };
 
-module.exports = { router, serviceMetadata };
+export { router, serviceMetadata }; // Use export instead of module.exports

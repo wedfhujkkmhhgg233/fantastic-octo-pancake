@@ -22,11 +22,18 @@ router.get('/wordnik', async (req, res) => {
         const html = response.data;
         const $ = cheerio.load(html);
 
-        // Scrape definitions
+        // Scrape definitions with part of speech
         const definitions = [];
         $('.definitions .definition').each((_, element) => {
-            const definition = $(element).text().trim();
-            if (definition) definitions.push(definition);
+            const definition = $(element).find('.word__defination--2q7ZH').text().trim();
+            const partOfSpeech = $(element).find('.pos').text().trim();
+
+            if (definition) {
+                definitions.push({
+                    definition,
+                    partOfSpeech: partOfSpeech || 'Unknown'  // Default to 'Unknown' if no part of speech is found
+                });
+            }
         });
 
         // Scrape examples
@@ -63,9 +70,9 @@ router.get('/wordnik', async (req, res) => {
 const serviceMetadata = {
     name: "Wordnik Scraper",
     author: "Jerome",
-    description: "Scrape word details from Wordnik",
+    description: "Scrape word details, definitions, examples, and part of speech from Wordnik",
     category: "dictionary",
-    link: ["/api/wordnik?word=dog"]
+    link: ["/api/wordnik?word=example"]
 };
 
 export { router, serviceMetadata };

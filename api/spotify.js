@@ -2,8 +2,13 @@ import express from 'express';
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const router = express.Router();
+
+// Define __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // List of existing MP3 file names
 const existingFiles = [

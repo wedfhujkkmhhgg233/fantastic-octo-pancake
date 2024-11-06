@@ -110,7 +110,10 @@ app.get('/service-list', async (req, res) => {
 
 // Load API routes for various services with .js extension
 import { router as bingRouter } from './api/bing.js';
-app.use('/service/api', bingRouter);
+app.use('/service/api', bingRouter);                                                                  
+
+import { router as arxivRouter } from './api/arxiv.js';
+app.use('/service/api', arxivRouter);
 
 import { router as numbersRouter } from './api/numbers.js';
 app.use('/service/api', numbersRouter);

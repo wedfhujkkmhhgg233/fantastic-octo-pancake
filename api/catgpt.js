@@ -15,13 +15,11 @@ router.get('/catgpt', async (req, res) => {
         
         const response = await axios.get(apiUrl);
         
-        const { content, reply } = response.data;
-        const transformedReply = `Cat: ${reply}`;
+        const transformedReply = `Cat: ${response.data.reply}`;
         
         const formattedResponse = {
             author: 'Jerome',
-            content,
-            reply: transformedReply
+            message: transformedReply
         };
 
         res.setHeader('Content-Type', 'application/json');

@@ -34,9 +34,9 @@ router.get('/remini', async (req, res) => {
 const serviceMetadata = {
     name: "Image Enhancement",
     author: "Jerome",
-    description: "Enhances images using Nayan Server",
+    description: "Enhances images",
     category: "Image Processing",
-    link: ["/remini?url=<IMAGE_URL>"]
+    link: ["/api/remini?url=<IMAGE_URL>"]
 };
 
 export { router, serviceMetadata };

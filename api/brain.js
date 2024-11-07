@@ -31,7 +31,7 @@ router.get('/brain-ai', async (req, res) => {
 const serviceMetadata = {
     name: "Brain AI",
     author: "Jerome",
-    description: "Interactive AI chatbot using Popcat API",
+    description: "Interactive AI chatbot",
     category: "Chat",
     link: ["/api/brain-ai?message="]
 };

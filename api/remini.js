@@ -1,43 +1,31 @@
 import express from 'express';
-import Upscaler from 'upscaler';
-import axios from 'axios';
-import fs from 'fs';
-import path from 'path';
+import nayanServer from 'nayan-server'; // Import without destructuring
 
 const router = express.Router();
-const upscaler = new Upscaler();
 
 router.get('/remini', async (req, res) => {
     const { url } = req.query;
 
     if (!url) {
         return res.status(400).json({
-            error: "Please provide an image URL with the 'url' query parameter."
+            error: "Please provide the 'url' query parameter."
         });
     }
 
     try {
-        // Fetch the image from the URL
-        const response = await axios.get(url, { responseType: 'arraybuffer' });
-        const imagePath = path.join(__dirname, 'temp-image.jpg');
+        const model = "1"; // Set the model to 1 by default
 
-        // Save the image temporarily
-        fs.writeFileSync(imagePath, response.data);
+        // Use Nayan Server's upscale function
+        const data = await nayanServer.upscale(url, model);
 
-        // Upscale the image
-        const upscaledImage = await upscaler.upscale(imagePath);
-
-        // Clean up the temporary image file
-        fs.unlinkSync(imagePath);
-
-        // Send back the enhanced image as base64 in a structured response
+        // Return the result in a structured format
         res.status(200).json({
             author: "Jerome",
-            enhanced_image: upscaledImage
+            enhanced_image: data // Assuming data contains the processed image URL or base64 string
         });
 
     } catch (error) {
-        console.error("Error processing image with Upscaler:", error);
+        console.error("Error processing image with Nayan:", error);
         res.status(500).json({ error: "An error occurred while processing the image." });
     }
 });
@@ -46,7 +34,7 @@ router.get('/remini', async (req, res) => {
 const serviceMetadata = {
     name: "Image Enhancement",
     author: "Jerome",
-    description: "Enhances images using the Upscaler library",
+    description: "Enhances images using Nayan Server",
     category: "Image Processing",
     link: ["/remini?url=<IMAGE_URL>"]
 };

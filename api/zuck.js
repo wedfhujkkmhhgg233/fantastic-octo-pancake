@@ -90,7 +90,7 @@ const serviceMetadata = {
     author: "Tiadals",
     description: "Adds a comment to an image of Zuckerberg's board.",
     category: "Canvas",
-    link: ["/zuck?text=your-text"]
+    link: ["/api/zuck?text=your-text"]
 };
 
 export { router, serviceMetadata };

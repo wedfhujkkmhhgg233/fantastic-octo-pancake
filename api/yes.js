@@ -77,7 +77,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Adds a comment on a meme-style image",
     category: "Canvas",
-    link: ["/yes?text=<YOUR_TEXT>"]
+    link: ["/api/yes?text=<YOUR_TEXT>"]
 };
 
 export { router, serviceMetadata };

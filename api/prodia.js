@@ -1,16 +1,14 @@
 import express from 'express';
-import axios from 'axios';
-import fs from 'fs';
-import https from 'https';
+import axios from 'axios';  // Import axios
 import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url'; // Required to get __dirname in ES modules
 
 const router = express.Router();
 
-// Create folder if it doesn't exist
-const folderPath = path.join(__dirname, 'jerprodia');
-if (!fs.existsSync(folderPath)) {
-  fs.mkdirSync(folderPath);
-}
+// Use fileURLToPath to get the directory name in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 router.get('/prodia', async (req, res) => {
     const { prompt } = req.query;
@@ -22,40 +20,41 @@ router.get('/prodia', async (req, res) => {
     }
 
     try {
-        // Step 1: Get the URL from the Prodia API
-        const apiUrl = `https://hercai.onrender.com/prodia/text2image?prompt=${encodeURIComponent(prompt)}`;
-        const response = await axios.get(apiUrl);
-
-        const imageUrl = response.data.url;
-
-        if (!imageUrl) {
-            return res.status(500).json({ error: "No image URL found in the response." });
-        }
-
-        // Step 2: Download the image
-        const filePath = path.join(folderPath, 'prodia.png');
-
-        const file = fs.createWriteStream(filePath);
-        https.get(imageUrl, (imageResponse) => {
-            imageResponse.pipe(file);
-            file.on('finish', () => {
-                file.close();  // Close the file stream
-
-                // Step 3: Send the response in a pretty print format
-                res.status(200).json({
-                    "model": "prodia",
-                    "prompt": prompt,
-                    "url": `https://jerome-web.onrender.com/jerprodia/prodia.png`
-                });
-            });
-        }).on('error', (error) => {
-            console.error("Error downloading the image:", error);
-            res.status(500).json({ error: "An error occurred while downloading the image." });
+        // Make a request to the Prodia API
+        const prodiaResponse = await axios.get(`https://hercai.onrender.com/prodia/text2image`, {
+            params: { prompt: prompt }
         });
 
+        const data = prodiaResponse.data;
+
+        if (data.url) {
+            const imageUrl = data.url;
+
+            // Fetch the image using axios
+            const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+            const imageBuffer = Buffer.from(imageResponse.data);
+
+            // Save the image to a file in the 'jerprodia' folder
+            const folderPath = path.join(__dirname, 'jerprodia');
+            if (!fs.existsSync(folderPath)) {
+                fs.mkdirSync(folderPath, { recursive: true });
+            }
+
+            const imagePath = path.join(folderPath, 'prodia.png');
+            fs.writeFileSync(imagePath, imageBuffer);
+
+            // Respond with the file URL
+            res.status(200).json({
+                model: "prodia",
+                prompt: prompt,
+                url: `https://jerome-web.onrender.com/jerprodia/prodia.png`
+            });
+        } else {
+            res.status(500).json({ error: 'Failed to generate image from Prodia API.' });
+        }
     } catch (error) {
-        console.error("Error generating image with Prodia:", error);
-        res.status(500).json({ error: "An error occurred while generating the image." });
+        console.error("Error in Prodia API:", error);
+        res.status(500).json({ error: "An error occurred while processing the image." });
     }
 });
 
@@ -63,9 +62,9 @@ router.get('/prodia', async (req, res) => {
 const serviceMetadata = {
     name: "Prodia Image Generation",
     author: "Jerome",
-    description: "Generates images based on text prompts using Prodia API and provides the image URL.",
+    description: "Generates images using the Prodia API based on text prompts.",
     category: "Image Generation",
-    link: ["/api/prodia?prompt="]
+    link: ["/prodia?prompt=<TEXT_PROMPT>"]
 };
 
 export { router, serviceMetadata };

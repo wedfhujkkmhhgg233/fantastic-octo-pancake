@@ -59,7 +59,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "A route to interact with the LLAMA model by providing a prompt.",
     category: "AI Interaction",
-    link: ["/llama?prompt="]
+    link: ["/api/llama?prompt="]
 };
 
 export { router, serviceMetadata };

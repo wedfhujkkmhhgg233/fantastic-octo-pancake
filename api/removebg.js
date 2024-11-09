@@ -43,7 +43,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Removes background from an image",
     category: "Image Processing",
-    link: ["/removebg?url="]
+    link: ["/api/removebg?url="]
 };
 
 export { router, serviceMetadata };

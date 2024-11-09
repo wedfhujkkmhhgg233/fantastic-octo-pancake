@@ -65,7 +65,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Upscales an image using the AI Image Upscaler API and sends the upscaled image directly as a response.",
     category: "Image Processing",
-    link: ["/upscalev2?imgurl="]
+    link: ["/api/upscalev2?imgurl="]
 };
 
 export { router, serviceMetadata };

@@ -43,7 +43,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Upscales images using Picsart API",
     category: "Image Processing",
-    link: ["/upscale?url=<IMAGE_URL>"]
+    link: ["/api/upscale?url=<IMAGE_URL>"]
 };
 
 export { router, serviceMetadata };

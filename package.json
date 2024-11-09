@@ -2,12 +2,12 @@
   "name": "fantastic-octo-pancake",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "mainjerjarjamismiss.js",
   "dependencies": {
     "express": "^4.17.1",
     "google-play-scraper": "^8.0.0"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node mainjerjarjamismiss.js"
   }
 }

@@ -34,7 +34,7 @@ const serviceMetadata = {
     name: "GeminiService",
     author: "Jerome",
     description: "Gemini API Service for text and image processing",
-    category: "AI Services",
+    category: "AI",
     link: ["/api/gemini?ask=&imgurl="]
 };
 

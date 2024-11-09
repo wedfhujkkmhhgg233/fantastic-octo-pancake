@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as fluxRouter } from './api/flux.js';
+app.use('/service/api', fluxRouter);
+
 import { router as geminiproRouter } from './api/geminipro.js';
 app.use('/service/api', geminiproRouter);
 

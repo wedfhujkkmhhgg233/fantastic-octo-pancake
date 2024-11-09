@@ -1,5 +1,5 @@
 import express from 'express';
-import { imagine } from '@shuddho11288/sdxl-imagine';
+import imagine from '@shuddho11288/sdxl-imagine'; // Import without curly braces
 
 const router = express.Router();
 

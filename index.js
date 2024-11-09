@@ -12,8 +12,6 @@ const __dirname = path.dirname(__filename);
 
 // Middleware to serve static files from the root directory
 app.use(express.static(__dirname));
-
-// Middleware to parse JSON bodies
 app.use(express.json());
 
 // Route to serve the index.html file
@@ -44,9 +42,7 @@ app.get('/config', (req, res) => {
 // /package endpoint to return package.json content
 app.get('/package', (req, res) => {
     fs.readFile(path.join(__dirname, 'package.json'), 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ error: 'Failed to read package.json' });
-        }
+        if (err) return res.status(500).json({ error: 'Failed to read package.json' });
         res.json(JSON.parse(data));
     });
 });
@@ -54,43 +50,44 @@ app.get('/package', (req, res) => {
 // /package-lock endpoint to return package-lock.json content
 app.get('/package-lock', (req, res) => {
     fs.readFile(path.join(__dirname, 'package-lock.json'), 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ error: 'Failed to read package-lock.json' });
-        }
+        if (err) return res.status(500).json({ error: 'Failed to read package-lock.json' });
         res.json(JSON.parse(data));
     });
 });
 
-// /service-list endpoint to combine and return all service metadata
+// Dynamically load all JSON files from the services directory and API routes from the api directory
 app.get('/service-list', async (req, res) => {
     const services = [];
     const servicesDir = path.join(__dirname, 'services');
     const apiDir = path.join(__dirname, 'api');
 
     try {
-        // Load JSON service metadata
+        // Load JSON files from services directory
         if (fs.existsSync(servicesDir)) {
             const files = fs.readdirSync(servicesDir);
-            files.forEach(file => {
+            for (const file of files) {
                 if (path.extname(file) === '.json') {
-                    const filePath = path.join(servicesDir, file);
-                    const data = fs.readFileSync(filePath, 'utf8');
+                    const data = fs.readFileSync(path.join(servicesDir, file), 'utf8');
                     services.push(JSON.parse(data));
                 }
-            });
+            }
+        } else {
+            console.warn('Services directory not found:', servicesDir);
         }
 
-        // Load API metadata from JS files
+        // Load API metadata from each .js file in the api directory
         if (fs.existsSync(apiDir)) {
             const apiFiles = fs.readdirSync(apiDir);
             for (const file of apiFiles) {
                 if (path.extname(file) === '.js') {
-                    const module = await import(path.join(apiDir, file).replace(/\.js$/, '.js'));
-                    if (module.serviceMetadata) {
-                        services.push(module.serviceMetadata);
-                    }
+                    const modulePath = path.join(apiDir, file);
+                    const module = await import(modulePath);
+                    if (module.serviceMetadata) services.push(module.serviceMetadata);
+                    else console.warn(`No service metadata found in ${file}`);
                 }
             }
+        } else {
+            console.warn('API directory not found:', apiDir);
         }
 
         res.json(services);
@@ -100,42 +97,26 @@ app.get('/service-list', async (req, res) => {
     }
 });
 
-// Load all API routes dynamically from the api directory
-const loadApiRoutes = async () => {
-    const apiDir = path.join(__dirname, 'api');
-    if (fs.existsSync(apiDir)) {
-        const files = fs.readdirSync(apiDir);
-        for (const file of files) {
-            if (path.extname(file) === '.js') {
-                const module = await import(path.join(apiDir, file));
-                if (module.router) {
-                    const routePath = `/service/api/${file.replace('.js', '')}`;
-                    app.use(routePath, module.router);
-                    console.log(`Loaded route: ${routePath}`);
-                } else {
-                    console.warn(`No router exported in ${file}`);
-                }
-            }
-        }
-    } else {
-        console.warn('API directory not found:', apiDir);
+// Dynamically load all route files from the api directory under /service/api
+const apiDir = path.join(__dirname, 'api');
+fs.readdirSync(apiDir).forEach(async file => {
+    if (path.extname(file) === '.js') {
+        const { router } = await import(path.join(apiDir, file));
+        app.use('/service/api', router);
     }
-};
+});
 
-// Call function to load API routes
-loadApiRoutes();
-
-// Route to serve downloader.html
+// Static route to serve downloader.html
 app.get('/downloader', (req, res) => {
     res.sendFile(path.join(__dirname, 'downloader.html'));
 });
 
-// Route to serve dashboard.html
+// Static route to serve dashboard.html
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 
-// Additional service routes
+// Static route to serve sim.html
 app.get('/sim', (req, res) => {
     res.sendFile(path.join(__dirname, 'sim.html'));
 });

@@ -2,7 +2,6 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { router as aiRouter } from './api/ai.js'; // Import AI router with .js extension
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -69,7 +68,7 @@ app.get('/service-list', async (req, res) => {
     const apiDir = path.join(__dirname, 'api');
 
     try {
-        // Read services directory for JSON files
+        // Load JSON service metadata
         if (fs.existsSync(servicesDir)) {
             const files = fs.readdirSync(servicesDir);
             files.forEach(file => {
@@ -79,26 +78,19 @@ app.get('/service-list', async (req, res) => {
                     services.push(JSON.parse(data));
                 }
             });
-        } else {
-            console.warn('Services directory not found:', servicesDir);
         }
 
-        // Read api directory for API service metadata
+        // Load API metadata from JS files
         if (fs.existsSync(apiDir)) {
             const apiFiles = fs.readdirSync(apiDir);
             for (const file of apiFiles) {
                 if (path.extname(file) === '.js') {
-                    // Dynamically import the JS file
                     const module = await import(path.join(apiDir, file).replace(/\.js$/, '.js'));
                     if (module.serviceMetadata) {
-                        services.push(module.serviceMetadata); // Add the service metadata to the list
-                    } else {
-                        console.warn(`No service metadata found in ${file}`);
+                        services.push(module.serviceMetadata);
                     }
                 }
             }
-        } else {
-            console.warn('API directory not found:', apiDir);
         }
 
         res.json(services);
@@ -108,95 +100,30 @@ app.get('/service-list', async (req, res) => {
     }
 });
 
-// Load API routes for various services with .js extension
-import { router as bingRouter } from './api/bing.js';
-app.use('/service/api', bingRouter);
+// Load all API routes dynamically from the api directory
+const loadApiRoutes = async () => {
+    const apiDir = path.join(__dirname, 'api');
+    if (fs.existsSync(apiDir)) {
+        const files = fs.readdirSync(apiDir);
+        for (const file of files) {
+            if (path.extname(file) === '.js') {
+                const module = await import(path.join(apiDir, file));
+                if (module.router) {
+                    const routePath = `/service/api/${file.replace('.js', '')}`;
+                    app.use(routePath, module.router);
+                    console.log(`Loaded route: ${routePath}`);
+                } else {
+                    console.warn(`No router exported in ${file}`);
+                }
+            }
+        }
+    } else {
+        console.warn('API directory not found:', apiDir);
+    }
+};
 
-import { router as removebgv2Router } from './api/removebgv2.js';
-app.use('/service/api', removebgv2Router);
-
-import { router as removebgRouter } from './api/removebg.js';
-app.use('/service/api', removebgRouter);
-
-import { router as wantedRouter } from './api/wanted.js';
-app.use('/service/api', wantedRouter);
-
-import { router as weatherRouter } from './api/weather.js';
-app.use('/service/api', weatherRouter);
-
-import { router as xavierRouter } from './api/xavier.js';
-app.use('/service/api', xavierRouter);
-
-import { router as yesRouter } from './api/yes.js';
-app.use('/service/api', yesRouter);
-
-import { router as zuckRouter } from './api/zuck.js';
-app.use('/service/api', zuckRouter);
-
-import { router as reminiRouter } from './api/remini.js';
-app.use('/service/api', reminiRouter);
-
-import { router as poetryRouter } from './api/poetry.js';
-app.use('/service/api', poetryRouter);
-
-import { router as ericRouter } from './api/eric.js';
-app.use('/service/api', ericRouter);
-
-import { router as brainRouter } from './api/brain.js';
-app.use('/service/api', brainRouter);
-
-import { router as catgptRouter } from './api/catgpt.js';
-app.use('/service/api', catgptRouter);
-
-import { router as arxivRouter } from './api/arxiv.js';
-app.use('/service/api', arxivRouter);
-
-import { router as numbersRouter } from './api/numbers.js';
-app.use('/service/api', numbersRouter);
-
-import { router as caseRouter } from './api/case.js';
-app.use('/service/api', caseRouter);
-
-import { router as citizendiumRouter } from './api/citizendium.js';
-app.use('/service/api', citizendiumRouter);
-
-import { router as wikihowRouter } from './api/wikihow.js';
-app.use('/service/api', wikihowRouter);
-
-import { router as wiktionaryRouter } from './api/wiktionary.js';
-app.use('/service/api', wiktionaryRouter);
-
-import { router as gimageRouter } from './api/gimage.js';
-app.use('/service/api', gimageRouter);
-
-import { router as playstoreRouter } from './api/playstore.js';
-app.use('/service/api', playstoreRouter);
-
-import { router as spotifyRouter } from './api/spotify.js';
-app.use('/service/api', spotifyRouter);
-
-import { router as lyricsRouter } from './api/lyrics.js';
-app.use('/service/api', lyricsRouter);
-
-import { router as chordsRouter } from './api/chords.js';
-app.use('/service/api', chordsRouter);
-
-import { router as merriamRouter } from './api/merriam.js';
-app.use('/service/api', merriamRouter);
-
-import { router as wordnikRouter } from './api/wordnik.js';
-app.use('/service/api', wordnikRouter);
-
-import { router as searchRouter } from './api/search.js';
-app.use('/service/api', searchRouter);
-
-import { router as geminiRouter } from './api/gemini.js';
-app.use('/service/api', geminiRouter);
-
-import { router as alldlRouter } from './api/alldl.js';
-app.use('/service/api', alldlRouter);
-
-app.use('/service/api', aiRouter);
+// Call function to load API routes
+loadApiRoutes();
 
 // Route to serve downloader.html
 app.get('/downloader', (req, res) => {
@@ -215,7 +142,7 @@ app.get('/sim', (req, res) => {
 
 // 404 error handler
 app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, '404.html')); // Assuming you have a 404.html file
+    res.status(404).sendFile(path.join(__dirname, '404.html'));
 });
 
 // Start the server

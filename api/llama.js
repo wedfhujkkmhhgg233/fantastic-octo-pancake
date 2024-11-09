@@ -107,7 +107,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "A route to interact with the LLAMA model by providing a prompt, supporting both streaming and non-streaming modes.",
     category: "AI Interaction",
-    link: ["/llama?prompt=hi&stream=false"]
+    link: ["/api/llama?prompt=hi&stream=false"]
 }
 
 export { router, serviceMetadata }

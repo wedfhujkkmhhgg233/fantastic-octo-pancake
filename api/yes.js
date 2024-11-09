@@ -73,10 +73,10 @@ router.get('/yes', async (req, res) => {
 
 // Route metadata
 const serviceMetadata = {
-    name: "Comment on Board",
-    author: "John Lester",
+    name: "Yes",
+    author: "Jerome",
     description: "Adds a comment on a meme-style image",
-    category: "Memes",
+    category: "Canvas",
     link: ["/yes?text=<YOUR_TEXT>"]
 };
 

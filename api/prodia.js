@@ -64,7 +64,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Generates images using the Prodia API based on text prompts.",
     category: "Image Generation",
-    link: ["/prodia?prompt=<TEXT_PROMPT>"]
+    link: ["/api/prodia?prompt="]
 };
 
 export { router, serviceMetadata };

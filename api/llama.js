@@ -3,55 +3,101 @@ import axios from 'axios'
 
 const router = express.Router()
 
-// Route for handling LLAMA model requests via GET
+// Route for handling LLAMA model requests
 router.get('/llama', async (req, res) => {
-    const { prompt } = req.query
+    const { prompt, stream } = req.query
 
-    // Ensure prompt is provided
     if (!prompt) {
-        return res.status(400).json({
+        return res.type('json').send(JSON.stringify({
             error: "Missing 'prompt' query parameter."
-        })
+        }, null, 2))
     }
 
-    // Build the message history for the LLAMA model
-    const history = [
-        { role: "assistant", content: "Hello! How are you?" },
+    const messages = [
+        { role: "assistant", content: "" },
         { role: "user", content: prompt }
     ]
 
     try {
-        // Make a request to the external API using axios
-        const response = await axios.post('https://nexra.aryahcr.cc/api/chat/complements', {
-            messages: history,
-            model: "llama2",
-            data: {
-                system_message: "",
-                temperature: 0.9,
-                max_tokens: 4096,
-                top_p: 0.6,
-                repetition_penalty: 1.2
-            },
-            markdown: false
-        })
+        // For streaming requests
+        if (stream === 'true') {
+            const response = await axios.post('https://nexra.aryahcr.cc/api/chat/complements', {
+                messages,
+                markdown: false,
+                stream: true,
+                model: "llama-3.1"
+            }, {
+                headers: { 'Content-Type': 'application/json' },
+                responseType: "stream"
+            })
 
-        // Send the success response in pretty-printed JSON format
-        const successResponse = {
-            status: "success",
-            message: "LLAMA response generated successfully.",
-            data: response.data
+            // Stream the response data back to the client
+            response.data.on("data", (chunk) => {
+                res.write(chunk)
+            })
+
+            response.data.on("end", () => {
+                res.end()
+            })
+
+            response.data.on("error", (err) => {
+                res.type('json').send(JSON.stringify({
+                    code: 500,
+                    status: false,
+                    error: "INTERNAL_SERVER_ERROR",
+                    message: "general (unknown) error",
+                    detail: err.message
+                }, null, 2))
+            })
+        } else {
+            // For non-streaming requests
+            const result = await axios.post('https://nexra.aryahcr.cc/api/chat/complements', {
+                messages,
+                markdown: false,
+                stream: false,
+                model: "llama-3.1"
+            }, {
+                headers: { 'Content-Type': 'application/json' }
+            })
+
+            const id = result.data.id
+            let response = null
+            let data = true
+
+            while (data) {
+                response = await axios.get(`https://nexra.aryahcr.cc/api/chat/task/${encodeURIComponent(id)}`)
+                response = response.data
+
+                switch (response.status) {
+                    case "pending":
+                        data = true
+                        break
+                    case "completed":
+                        data = false
+                        res.type('json').send(JSON.stringify({
+                            status: "success",
+                            message: "LLAMA response generated successfully.",
+                            data: response
+                        }, null, 2))
+                        break
+                    case "error":
+                    case "not_found":
+                        data = false
+                        res.type('json').send(JSON.stringify({
+                            status: "error",
+                            message: "An error occurred while processing your request.",
+                            error: response
+                        }, null, 2))
+                        break
+                }
+            }
         }
-
-        res.type('json').send(JSON.stringify(successResponse, null, 2))
     } catch (error) {
-        // Handle errors and send a formatted JSON error response
-        const errorResponse = {
+        res.type('json').send(JSON.stringify({
             status: "error",
             message: "An error occurred while processing your request.",
             error: error.message
-        }
-
-        res.status(500).type('json').send(JSON.stringify(errorResponse, null, 2))
+        }, null, 2))
     }
 })
 
@@ -59,9 +105,9 @@ router.get('/llama', async (req, res) => {
 const serviceMetadata = {
     name: "LLAMA Model API",
     author: "Jerome",
-    description: "A route to interact with the LLAMA model by providing a prompt.",
-    category: "AI",
-    link: ["/api/llama?prompt="]
+    description: "A route to interact with the LLAMA model by providing a prompt, supporting both streaming and non-streaming modes.",
+    category: "AI Interaction",
+    link: ["/llama?prompt=hi&stream=false"]
 }
 
 export { router, serviceMetadata }

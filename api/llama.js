@@ -106,7 +106,7 @@ const serviceMetadata = {
     name: "LLAMA Model API",
     author: "Jerome",
     description: "A route to interact with the LLAMA model by providing a prompt, supporting both streaming and non-streaming modes.",
-    category: "AI Interaction",
+    category: "AI",
     link: ["/api/llama?prompt=hi&stream=false"]
 }
 

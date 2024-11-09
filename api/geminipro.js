@@ -106,7 +106,7 @@ const serviceMetadata = {
     name: "Gemini Pro Model API",
     author: "Jerome",
     description: "A route to interact with the Gemini Pro model by providing a prompt, supporting both streaming and non-streaming modes.",
-    category: "AI Interaction",
+    category: "AI",
     link: ["/api/gemini-pro?prompt=hi&stream=false"]
 }
 

@@ -2,6 +2,7 @@ import express from 'express';
 import fs from 'fs-extra';
 import DIG from 'discord-image-generation';
 import superfetch from 'node-superfetch';
+import path from 'path';
 
 const router = express.Router();
 
@@ -24,19 +25,19 @@ router.get('/wanted', async (req, res) => {
 
         // Generate the "wanted" image using discord-image-generation
         const img = await new DIG.Wanted().getImage(avatar);
-        const path_wanted = './cache/wanted.png';
+        const pathWanted = path.resolve('./cache/wanted.png');
 
-        // Save the image to a fixed file path
-        fs.writeFileSync(path_wanted, img);
+        // Save the image to the fixed file path
+        fs.writeFileSync(pathWanted, img);
 
-        // Send the generated image
-        res.status(200).sendFile(path_wanted, (err) => {
+        // Send the generated image file with an absolute path
+        res.status(200).sendFile(pathWanted, (err) => {
             if (err) {
                 console.error("Error sending file:", err);
                 res.status(500).json({ error: "Failed to send image file." });
             }
             // Delete the image file after sending
-            fs.unlinkSync(path_wanted);
+            fs.unlinkSync(pathWanted);
         });
     } catch (error) {
         console.error("Error generating wanted image:", error);

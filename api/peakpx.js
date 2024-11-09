@@ -57,7 +57,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Searches wallpapers on PeakPX by keyword.",
     category: "Image Search",
-    link: ["/peakpx?query="]
+    link: ["/api/peakpx?query="]
 };
 
 export { router, serviceMetadata };

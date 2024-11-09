@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as peakpxRouter } from './api/peakpx.js';
+app.use('/service/api', peakpxRouter);
+
 import { router as prodiaRouter } from './api/prodia.js';
 app.use('/service/api', prodiaRouter);
 

@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as weatherRouter } from './api/weather.js';
+app.use('/service/api', weatherRouter);
+
 import { router as xavierRouter } from './api/xavier.js';
 app.use('/service/api', xavierRouter);
 

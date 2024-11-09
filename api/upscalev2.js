@@ -32,7 +32,7 @@ router.get('/upscalev2', async (req, res) => {
             return res.status(500).json({ error: "No result found in the response." });
         }
 
-        // Determine the image format (you can change this logic if the API provides different formats)
+        // Check for image format (e.g., PNG, JPEG) from base64 string
         let mimeType = 'image/png'; // Default to PNG
 
         if (base64Image.startsWith('iVBORw0KGgo')) {
@@ -43,10 +43,10 @@ router.get('/upscalev2', async (req, res) => {
             mimeType = 'image/gif'; // GIF format
         }
 
-        // Convert base64 to image buffer
+        // Convert base64 to buffer
         const buffer = Buffer.from(base64Image, 'base64');
 
-        // Set the response header to send the correct image format
+        // Set headers to indicate image type
         res.setHeader('Content-Type', mimeType);
         res.setHeader('Content-Length', buffer.length);
 
@@ -65,7 +65,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "Upscales an image using the AI Image Upscaler API and sends the upscaled image directly as a response.",
     category: "Image Processing",
-    link: ["/api/upscalev2?imgurl="]
+    link: ["/upscalev2?imgurl="]
 };
 
 export { router, serviceMetadata };

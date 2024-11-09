@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as removebgv2Router } from './api/removebgv2.js';
+app.use('/service/api', removebgv2Router);
+
 import { router as removebgRouter } from './api/removebg.js';
 app.use('/service/api', removebgRouter);
 

@@ -1,14 +1,7 @@
 import express from 'express';
 import axios from 'axios';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
 
 const router = express.Router();
-
-// Get __dirname in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 router.get('/prodia', async (req, res) => {
     const { prompt } = req.query;
@@ -20,34 +13,21 @@ router.get('/prodia', async (req, res) => {
     }
 
     try {
-        // Make a request to the Prodia API
+        // Make a request to the Prodia API with the provided prompt
         const prodiaResponse = await axios.get(`https://hercai.onrender.com/prodia/text2image`, {
             params: { prompt: prompt }
         });
 
         const data = prodiaResponse.data;
 
+        // Check if the API response contains a URL
         if (data.url) {
-            const imageUrl = data.url;
-
-            // Fetch the image with axios and set responseType to arraybuffer for binary data
-            const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-            const imageBuffer = Buffer.from(imageResponse.data, 'binary');
-
-            // Save the image as PNG in the 'jerprodia' folder
-            const folderPath = path.join(__dirname, 'jerprodia');
-            if (!fs.existsSync(folderPath)) {
-                fs.mkdirSync(folderPath, { recursive: true });
-            }
-
-            const imagePath = path.join(folderPath, 'prodia.png');
-            fs.writeFileSync(imagePath, imageBuffer, 'binary'); // Specify 'binary' encoding
-
-            // Respond with the file URL in pretty print format
+            // Respond with the URL and author in pretty print format
             res.status(200).json({
                 model: "prodia",
                 prompt: prompt,
-                url: `https://jerome-web.onrender.com/jerprodia/prodia.png`
+                url: data.url,
+                author: "Jerome"
             });
         } else {
             res.status(500).json({ error: 'Failed to generate image from Prodia API.' });

@@ -32,7 +32,7 @@ const serviceMetadata = {
     name: "Brain AI",
     author: "Jerome",
     description: "Interactive AI chatbot",
-    category: "Chat",
+    category: "AI",
     link: ["/api/brain-ai?message="]
 };
 

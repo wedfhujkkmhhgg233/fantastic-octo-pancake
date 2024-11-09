@@ -2,6 +2,7 @@ import express from 'express';
 import axios from 'axios';
 import fs from 'fs-extra';
 import canvas from 'canvas';
+import path from 'path';  // Import the path module
 
 const router = express.Router();
 
@@ -40,7 +41,7 @@ router.get('/yes', async (req, res) => {
         return res.status(400).json({ error: "Please provide text with the 'text' query parameter." });
     }
 
-    const pathImg = './cache/yes.png';
+    const pathImg = path.resolve('./cache/yes.png');  // Use path.resolve to get the absolute path
 
     try {
         const imageResponse = await axios.get('https://i.ibb.co/GQbRhkY/Picsart-22-08-14-17-32-11-488.jpg', { responseType: 'arraybuffer' });

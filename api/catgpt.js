@@ -36,7 +36,7 @@ const serviceMetadata = {
     name: "CatGPT",
     author: "Jerome Jamis",
     description: "Interacts with CatGPT for Filipino Taglish responses as a playful cat persona.",
-    category: "Chat",
+    category: "AI",
     link: ["/api/catgpt?message="]
 };
 

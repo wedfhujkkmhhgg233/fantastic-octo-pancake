@@ -10,21 +10,17 @@ const serviceMetadata = {
   author: "Jerome Jamis",
   description: "Fetches Wattpad story information, including reading chapters, getting story parts, and searching for stories.",
   category: "Books",
-  link: [
-    "/service/api/wattpad/search?query=example", 
-    "/service/api/wattpad/story-parts?url=https://www.wattpad.com/story/example",
-    "/service/api/wattpad/read-chapter?url=https://www.wattpad.com/story/example/chapter/example"
-  ]
+  link: ["/api/wattpad?type=search&query=example", "/api/wattpad?type=story-parts&url=https://www.wattpad.com/story/example", "/api/wattpad?type=read-chapter&url=https://www.wattpad.com/story/example/chapter/example"]
 };
 
-// Function to read chapter content
+// Helper functions
 async function readChapter(url) {
   try {
     const response = await axios.get(url);
     const html = response.data;
     const $ = cheerio.load(html);
     const paragraphs = $('p[data-p-id]');
-    
+
     return paragraphs
       .map((_, element) => $(element).text().trim())
       .get()
@@ -34,7 +30,6 @@ async function readChapter(url) {
   }
 }
 
-// Function to get all parts of a story
 async function getStoryParts(url) {
   try {
     const response = await axios.get(url);
@@ -56,7 +51,6 @@ async function getStoryParts(url) {
   }
 }
 
-// Function to search stories on Wattpad
 async function searchStories(query) {
   try {
     const response = await axios.get(`https://www.wattpad.com/search/${encodeURIComponent(query)}`);
@@ -89,42 +83,42 @@ async function searchStories(query) {
   }
 }
 
-// Route to search for stories
-router.get('/wattpad/search', async (req, res) => {
-  try {
-    const { query } = req.query;
-    const stories = await searchStories(query);
-    res.setHeader("Content-Type", "application/json");
-    res.send(JSON.stringify({ success: true, stories }, null, 2));
-  } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(500).send(JSON.stringify({ error: "Failed to search stories", message: error.message }, null, 2));
-  }
-});
+// Unified Wattpad route
+router.get('/wattpad', async (req, res) => {
+  const { type, url, query } = req.query;
 
-// Route to get all parts of a story
-router.get('/wattpad/story-parts', async (req, res) => {
   try {
-    const { url } = req.query;
-    const parts = await getStoryParts(url);
-    res.setHeader("Content-Type", "application/json");
-    res.send(JSON.stringify({ success: true, parts }, null, 2));
+    let result;
+    switch (type) {
+      case 'search':
+        if (!query) {
+          throw new Error("Query parameter 'query' is required for search.");
+        }
+        result = await searchStories(query);
+        res.status(200).json({ success: true, data: result });
+        break;
+      
+      case 'story-parts':
+        if (!url) {
+          throw new Error("Query parameter 'url' is required for story-parts.");
+        }
+        result = await getStoryParts(url);
+        res.status(200).json({ success: true, data: result });
+        break;
+      
+      case 'read-chapter':
+        if (!url) {
+          throw new Error("Query parameter 'url' is required for read-chapter.");
+        }
+        result = await readChapter(url);
+        res.status(200).json({ success: true, data: result });
+        break;
+      
+      default:
+        throw new Error("Invalid 'type' parameter. Valid options are 'search', 'story-parts', or 'read-chapter'.");
+    }
   } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(500).send(JSON.stringify({ error: "Failed to get story parts", message: error.message }, null, 2));
-  }
-});
-
-// Route to read a specific chapter
-router.get('/wattpad/read-chapter', async (req, res) => {
-  try {
-    const { url } = req.query;
-    const chapterContent = await readChapter(url);
-    res.setHeader("Content-Type", "application/json");
-    res.send(JSON.stringify({ success: true, chapterContent }, null, 2));
-  } catch (error) {
-    res.setHeader("Content-Type", "application/json");
-    res.status(500).send(JSON.stringify({ error: "Failed to read chapter", message: error.message }, null, 2));
+    res.status(400).json({ success: false, error: error.message });
   }
 });
 

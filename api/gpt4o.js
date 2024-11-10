@@ -3,71 +3,47 @@ import GPT4js from 'gpt4js';
 
 const router = express.Router();
 
-// Options for the GPT-4o model
-const options = {
-  provider: "Nextway",
-  model: "gpt-4o-free",
-};
+// Route for GPT-4o chat interaction
+router.get('/gpt4o-chat', async (req, res) => {
+  const { message } = req.query;  // Expecting the message in the query parameter
 
-// Function to format and display the entire response
-const prettyJsonResponse = (responseData) => {
-  const formattedResponse = {
-    responses: responseData.response || "No response content",  // Adjust this according to the actual structure
-    author: "Jerome"
-  };
-  return JSON.stringify(formattedResponse, null, 2); // Pretty print with indentation
-};
-
-// Route to handle GPT-4o response
-router.get('/gpt4o-response', async (req, res) => {
-  const { prompt } = req.query;
-
-  if (!prompt) {
-    return res.type('json').send(JSON.stringify({
-      error: "Missing 'prompt' query parameter."
-    }, null, 2));
+  if (!message) {
+    return res.status(400).json({ error: "Missing 'message' query parameter" });
   }
 
-  // Modify the messages to include the user prompt
-  const messagesWithUserPrompt = [{ role: "user", content: prompt }];
+  const options = {
+    provider: "Nextway",
+    model: "gpt-4o-free",
+  };
+
+  const messages = [{ role: "user", content: message }];
+  const provider = GPT4js.createProvider(options.provider);
 
   try {
-    const provider = GPT4js.createProvider(options.provider);
+    // Get the full response from GPT-4o
+    const data = await provider.chatCompletion(messages, options);
 
-    // Request a chat completion from the provider
-    const responses = await provider.chatCompletion(messagesWithUserPrompt, options);
-
-    // Check if the responses array is returned and then format the output
-    if (Array.isArray(responses) && responses.length > 0) {
-      // Collect all responses if there are multiple
-      const allResponses = responses.map(response => ({
-        response: response.response || "No response content",
-        author: "Jerome"
-      }));
-
-      // Return all responses in JSON format
-      res.type('json').send(JSON.stringify({ responses: allResponses }, null, 2));
-    } else {
-      res.type('json').send(prettyJsonResponse(responses));
-    }
-
+    res.json({
+      status: "success",
+      response: data,  // Returning the full response from GPT-4o
+    });
   } catch (error) {
     console.error("Error:", error);
-    res.type('json').send(JSON.stringify({
+    res.status(500).json({
       status: "error",
       message: "An error occurred while processing your request.",
-      error: error.message
-    }, null, 2));
+      error: error.message,
+    });
   }
 });
 
-// Route metadata (for documentation purposes)
+// Route metadata
 const serviceMetadata = {
-  name: "GPT-4o API",
+  name: "GPT-4o Chat API",
   author: "Jerome",
-  description: "A route to interact with the GPT-4o model, generating responses based on user input.",
+  description: "A route to interact with the GPT-4o model, sending a user message and getting a response.",
   category: "AI",
-  link: ["/api/gpt4o-response?prompt=hi"]
+  link: ["/gpt4o-chat?message=hi"]
 };
 
 export { router, serviceMetadata };

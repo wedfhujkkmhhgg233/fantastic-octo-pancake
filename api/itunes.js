@@ -5,13 +5,16 @@ import path from 'path';
 
 const router = express.Router();
 
+// Get the current directory in ES modules
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
 // Service metadata for your route
 const serviceMetadata = {
   name: "iTunes Music Search",
   author: "Jerome Jamis",
   description: "Fetches music search results from iTunes API based on the query term.",
   category: "Music",
-  link: ["/api/itunes?term=Faded Alan Walker&media=&limit="]
+  link: ["/api/itunes?term=Faded Alan Walker&media=music&limit=10"]
 };
 
 // Define the iTunes search route
@@ -23,7 +26,7 @@ router.get('/itunes', async (req, res) => {
     return res.status(400).json({
       error: "Missing required parameter 'term'",
       message: "Please provide a 'term' parameter for searching.",
-      exampleUsage: "/itunes?term=faded&media=music&limit=10"
+      exampleUsage: "/service/itunes?term=faded&media=music&limit=10"
     });
   }
 
@@ -38,35 +41,37 @@ router.get('/itunes', async (req, res) => {
         term: term,
         media: searchMedia,
         limit: searchLimit
-      },
-      responseType: 'arraybuffer' // Download the content as a binary stream
+      }
     });
 
-    // Ensure response is received as a file
-    if (response.data) {
-      // Write the downloaded content to a file (itunes.json)
+    // Ensure response is in JSON format
+    if (response.headers['content-type'].includes('application/json')) {
+      // Define the path to save the file
       const filePath = path.join(__dirname, 'itunes.json');
-      fs.writeFileSync(filePath, response.data);  // Save the raw response
 
-      // Read the saved JSON file and parse it
-      const fileContent = fs.readFileSync(filePath, 'utf-8');
-      const parsedContent = JSON.parse(fileContent); // Parse it as JSON
-
-      // Send the formatted response
-      const prettyResponse = JSON.stringify({
+      // Prepare the data to be saved, including metadata and iTunes results
+      const dataToSave = {
         metadata: serviceMetadata,
-        resultCount: parsedContent.resultCount,
-        results: parsedContent.results
-      }, null, 2); // Pretty print with 2-space indentation
+        resultCount: response.data.resultCount,
+        results: response.data.results
+      };
 
-      // Set the Content-Type header to application/json
-      res.setHeader('Content-Type', 'application/json'); 
+      // Save the data to a file
+      fs.writeFileSync(filePath, JSON.stringify(dataToSave, null, 2)); // Pretty print with 2-space indentation
 
-      return res.send(prettyResponse);
+      // Read the saved JSON file
+      const savedData = fs.readFileSync(filePath, 'utf-8');
+
+      // Set headers explicitly to treat the response as JSON and prevent download
+      res.setHeader('Content-Type', 'application/json'); // Ensure response is treated as JSON
+      res.setHeader('Content-Disposition', 'inline'); // Prevent file download
+
+      return res.send(savedData); // Send the saved JSON content
+
     } else {
       return res.status(500).json({
-        error: "No data received",
-        message: "No data was received from the iTunes API."
+        error: "Unexpected response format",
+        message: "The response from iTunes API was not in expected JSON format."
       });
     }
   } catch (error) {
@@ -79,4 +84,5 @@ router.get('/itunes', async (req, res) => {
   }
 });
 
-export { router, serviceMetadata };  // Export the router and metadata
+// Export both the router and serviceMetadata
+export { router, serviceMetadata };

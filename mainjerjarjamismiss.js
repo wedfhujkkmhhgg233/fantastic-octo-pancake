@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as dalleRouter } from './api/dalle.js';
+app.use('/service/api', dalleRouter);
+
 import { router as emiRouter } from './api/emi.js';
 app.use('/service/api', emiRouter);
 

@@ -1,14 +1,10 @@
 import express from 'express';
 import GPT4js from 'gpt4js';
-import axios from 'axios';
 
 const router = express.Router();
 
 // Define the system and user messages
-const messages = [
-  { role: "system", content: "You're an expert bot in programming." },
-  { role: "user", content: "Hi, write me something." },
-];
+const messages = [{ role: "user", content: "hi!" }];
 
 // Options for the GPT-4o model
 const options = {
@@ -18,12 +14,12 @@ const options = {
 
 // Function to format and display the JSON response with the author field
 const prettyJsonResponse = (responseData) => {
-  // Add the author field to the response data
-  const responseWithAuthor = {
-    ...responseData,
+  // Ensure that the response contains a proper string as the content, not broken down by characters
+  const formattedResponse = {
+    content: responseData.response || "No response content",
     author: "Jerome"
   };
-  return JSON.stringify(responseWithAuthor, null, 2); // Pretty print with indentation
+  return JSON.stringify(formattedResponse, null, 2); // Pretty print with indentation
 };
 
 // Route to handle GPT-4o response
@@ -36,10 +32,8 @@ router.get('/gpt4o-response', async (req, res) => {
     }, null, 2));
   }
 
-  const messagesWithUserPrompt = [
-    { role: "system", content: "You're an expert bot in programming." },
-    { role: "user", content: prompt },  // Using user prompt from the query parameter
-  ];
+  // Modify the messages to include the user prompt
+  const messagesWithUserPrompt = [{ role: "user", content: prompt }];
 
   try {
     const provider = GPT4js.createProvider(options.provider);
@@ -49,7 +43,7 @@ router.get('/gpt4o-response', async (req, res) => {
       console.log(prettyJsonResponse(data));
     });
 
-    // Return the response in JSON format with author field
+    // Return the response in JSON format with the author field
     res.type('json').send(prettyJsonResponse(text));
 
   } catch (error) {
@@ -68,7 +62,7 @@ const serviceMetadata = {
   author: "Jerome",
   description: "A route to interact with the GPT-4o model, generating responses based on user input.",
   category: "AI",
-  link: ["/api/gpt4o-response?prompt=hi"]
+  link: ["/gpt4o-response?prompt=hi"]
 };
 
 export { router, serviceMetadata };

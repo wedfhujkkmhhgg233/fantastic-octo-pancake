@@ -17,7 +17,7 @@ router.get('/sdxl-image', async (req, res) => {
         // Initial POST request to start image generation with SDXL model
         const result = await axios.post('https://nexra.aryahcr.cc/api/image/complements', {
             prompt: prompt,
-            model: "sdxl-lora",
+            model: "stablediffusion-1.5",
             data: {
                 guidance: parseFloat(guidance) || 0.3,
                 steps: parseInt(steps) || 2

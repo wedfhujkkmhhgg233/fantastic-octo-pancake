@@ -197,13 +197,13 @@ router.get('/wordnik-scrape', async (req, res) => {
 });
 
 // Metadata for the route
-const serviceMetaData = {
+const serviceMetadata = {
   name: 'Wordnik Scraper',
   description: 'This service scrapes Wordnik to get information like definitions, etymologies, examples, and more for a given word.',
   category: 'Dictionary API',
   author: 'Jerome Jamis',
-  link: '/api/wordnik-scrape?word=cat'
+  link: '/service/wordnik-scrape?word=<your-word-here>'
 };
 
 // Exporting the router and service metadata
-export { router, serviceMetaData };
+export { router, serviceMetadata };

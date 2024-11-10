@@ -3,20 +3,16 @@ import GPT4js from 'gpt4js';
 
 const router = express.Router();
 
-// Define the system and user messages
-const messages = [{ role: "user", content: "hi!" }];
-
 // Options for the GPT-4o model
 const options = {
   provider: "Nextway",
   model: "gpt-4o-free",
 };
 
-// Function to format and display the JSON response with the author field
+// Function to format and display the entire response
 const prettyJsonResponse = (responseData) => {
-  // Ensure that the response contains a proper string as the content, not broken down by characters
   const formattedResponse = {
-    content: responseData.response || "No response content",
+    responses: responseData.response || "No response content",  // Adjust this according to the actual structure
     author: "Jerome"
   };
   return JSON.stringify(formattedResponse, null, 2); // Pretty print with indentation
@@ -39,12 +35,21 @@ router.get('/gpt4o-response', async (req, res) => {
     const provider = GPT4js.createProvider(options.provider);
 
     // Request a chat completion from the provider
-    const text = await provider.chatCompletion(messagesWithUserPrompt, options, (data) => {
-      console.log(prettyJsonResponse(data));
-    });
+    const responses = await provider.chatCompletion(messagesWithUserPrompt, options);
 
-    // Return the response in JSON format with the author field
-    res.type('json').send(prettyJsonResponse(text));
+    // Check if the responses array is returned and then format the output
+    if (Array.isArray(responses) && responses.length > 0) {
+      // Collect all responses if there are multiple
+      const allResponses = responses.map(response => ({
+        response: response.response || "No response content",
+        author: "Jerome"
+      }));
+
+      // Return all responses in JSON format
+      res.type('json').send(JSON.stringify({ responses: allResponses }, null, 2));
+    } else {
+      res.type('json').send(prettyJsonResponse(responses));
+    }
 
   } catch (error) {
     console.error("Error:", error);

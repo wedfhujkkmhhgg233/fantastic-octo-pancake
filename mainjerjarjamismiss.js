@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as emiRouter } from './api/emi.js';
+app.use('/service/api', emiRouter);
+
 import { router as sdxlRouter } from './api/sdxl.js';
 app.use('/service/api', sdxlRouter);
 

@@ -72,7 +72,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "A route to interact with the MidJourney image generation model by providing a prompt.",
     category: "AI Image Generation",
-    link: ["/api/midjourney-image?prompt=<YOUR_IMAGE_PROMPT_HERE>"]
+    link: ["/api/midjourney-image?prompt=dog"]
 }
 
 export { router, serviceMetadata }

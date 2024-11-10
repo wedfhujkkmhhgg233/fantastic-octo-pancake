@@ -43,7 +43,7 @@ const serviceMetadata = {
   author: "Jerome",
   description: "A route to interact with the GPT-4o model, sending a user message and getting a response.",
   category: "AI",
-  link: ["/gpt4o-chat?message=hi"]
+  link: ["/api/gpt4o-chat?message=hi"]
 };
 
 export { router, serviceMetadata };

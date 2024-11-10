@@ -1,59 +1,63 @@
 import express from 'express';
-import gplay from 'google-play-scraper'; // This is the only package needed for Google Play scraping
+import axios from 'axios';
 
 const router = express.Router();
 
-// Route to search for apps on the Google Play Store
-router.get('/playstore', async (req, res) => {
-    const { name } = req.query; // Extract 'name' parameter from the query string
-
-    if (!name) {
-        return res.status(400).json({
-            error: "Please add ?name=app_name"
-        });
-    }
-
-    try {
-        // Search for apps with the specified name
-        const results = await gplay.search({
-            term: name,
-            num: 10 // Limit the number of results, change if you want more
-        });
-
-        if (results.length === 0) {
-            return res.status(404).json({
-                error: "No apps found for the provided name"
-            });
-        }
-
-        // Return all relevant details for each app found
-        const appDetails = results.map(app => ({
-            title: app.title,
-            appId: app.appId,
-            url: app.url,
-            developer: app.developer,
-            icon: app.icon,
-            summary: app.summary,
-            score: app.score
-        }));
-
-        res.setHeader('Content-Type', 'application/json');
-        res.send(JSON.stringify(appDetails, null, 2));
-
-    } catch (error) {
-        console.error("Error fetching app details:", error);
-        res.status(500).json({
-            error: "Failed to retrieve app details"
-        });
-    }
-});
-
+// Define service metadata
 const serviceMetadata = {
-    name: "Play Store Search",
-    author: "Jerome",
-    description: "Search for apps on the Google Play Store by name",
-    category: "app store",
-    link: ["/api/playstore?name=Facebook"]
+  name: "Playstore API",
+  author: "Jerome Jamis",
+  description: "Fetches Google Play Store app data based on a search query.",
+  category: "Search",
+  link: [
+    "/api/playstore?q=Facebook"
+  ]
 };
+
+// Define the route for Playstore API
+router.get('/service/playstore', async (req, res) => {
+  const query = req.query.q;
+
+  if (!query) {
+    return res.status(400).json(JSON.stringify({
+      error: "Query parameter 'q' is required.",
+      message: "Please provide a search query to fetch Google Play Store app data.",
+      exampleUsage: "/service/playstore?q=your_search_query"
+    }, null, 2)); // Pretty JSON with indentation of 2 spaces
+  }
+
+  try {
+    const apiResponse = await axios.get(`https://serpapi.com/search`, {
+      params: {
+        engine: 'google_play',
+        q: query,
+        api_key: 'YOUR_SERPAPI_KEY', // Replace with actual SerpApi key
+      },
+    });
+
+    // Ensure response contains expected data
+    if (apiResponse.data && apiResponse.data.organic_results) {
+      return res.json(JSON.stringify({
+        metadata: serviceMetadata,
+        search_metadata: apiResponse.data.search_metadata,
+        search_parameters: apiResponse.data.search_parameters,
+        app_highlight: apiResponse.data.app_highlight,
+        organic_results: apiResponse.data.organic_results,
+      }, null, 2)); // Pretty JSON with indentation of 2 spaces
+    } else {
+      return res.status(404).json(JSON.stringify({
+        error: "No results found.",
+        message: "The search did not return any results for the provided query."
+      }, null, 2)); // Pretty JSON with indentation of 2 spaces
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json(JSON.stringify({
+      error: "Internal Server Error",
+      message: "Error fetching data from SerpApi. Please try again later.",
+      errorDetails: error.message
+    }, null, 2)); // Pretty JSON with indentation of 2 spaces
+  }
+});
 
 export { router, serviceMetadata };

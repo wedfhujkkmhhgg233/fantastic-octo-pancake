@@ -3,9 +3,9 @@ import axios from 'axios'
 
 const router = express.Router()
 
-// Route for SDXL image generation requests
+// Route for Stable Diffusion image generation
 router.get('/sdxl-image', async (req, res) => {
-    const { prompt, guidance, steps } = req.query
+    const { prompt } = req.query
 
     if (!prompt) {
         return res.type('json').send(JSON.stringify({
@@ -14,14 +14,10 @@ router.get('/sdxl-image', async (req, res) => {
     }
 
     try {
-        // Initial POST request to start image generation with SDXL model
+        // POST request to initiate image generation with the Stable Diffusion model
         const result = await axios.post('https://nexra.aryahcr.cc/api/image/complements', {
             prompt: prompt,
-            model: "stablediffusion-1.5",
-            data: {
-                guidance: parseFloat(guidance) || 0.3,
-                steps: parseInt(steps) || 2
-            }
+            model: "stablediffusion-1.5"
         }, {
             headers: {
                 'Content-Type': 'application/json'
@@ -32,8 +28,8 @@ router.get('/sdxl-image', async (req, res) => {
         let response = null
         let data = true
 
+        // Polling for completion
         while (data) {
-            // Polling the SDXL API for task completion
             response = await axios.get(`http://nexra.aryahcr.cc/api/image/complements/${encodeURIComponent(id)}`)
             response = response.data
             console.log(response)
@@ -46,7 +42,7 @@ router.get('/sdxl-image', async (req, res) => {
                     data = false
                     res.type('json').send(JSON.stringify({
                         status: "success",
-                        message: "Image generated successfully by SDXL model.",
+                        message: "Image generated successfully by Stable Diffusion model.",
                         data: response
                     }, null, 2))
                     break
@@ -72,11 +68,11 @@ router.get('/sdxl-image', async (req, res) => {
 
 // Route metadata
 const serviceMetadata = {
-    name: "SDXL Image Generation API",
+    name: "Stable Diffusion Image Generation API",
     author: "Jerome",
-    description: "A route to interact with the SDXL model, generating an image based on a futuristic city prompt.",
+    description: "A route to interact with the Stable Diffusion model, generating an image based on a scenic sunset landscape prompt.",
     category: "AI Image Generation",
-    link: ["/api/sdxl-image?prompt=dog"]
+    link: ["/sdxl-image?prompt=dog"]
 }
 
 export { router, serviceMetadata }

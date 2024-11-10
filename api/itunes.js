@@ -44,34 +44,32 @@ router.get('/itunes', async (req, res) => {
       }
     });
 
-    // Ensure response is in JSON format
-    if (response.headers['content-type'].includes('application/json')) {
-      // Define the path to save the file
-      const filePath = path.join(__dirname, 'itunes.json');
+    // Log the response headers to inspect content type
+    console.log("iTunes API response headers:", response.headers);
 
-      // Prepare the data to be saved, including metadata and iTunes results
-      const dataToSave = {
+    // Check if the response content type is JSON
+    if (response.headers['content-type'] && response.headers['content-type'].includes('application/json')) {
+      // If the response is in JSON format, handle it
+      const prettyResponse = JSON.stringify({
         metadata: serviceMetadata,
         resultCount: response.data.resultCount,
         results: response.data.results
-      };
+      }, null, 2); // Pretty print with 2-space indentation
 
-      // Save the data to a file
-      fs.writeFileSync(filePath, JSON.stringify(dataToSave, null, 2)); // Pretty print with 2-space indentation
+      // Save the JSON response to a file
+      const filePath = path.join(__dirname, 'itunes.json');
+      fs.writeFileSync(filePath, prettyResponse); // Save the response
 
-      // Read the saved JSON file
-      const savedData = fs.readFileSync(filePath, 'utf-8');
-
-      // Set headers explicitly to treat the response as JSON and prevent download
-      res.setHeader('Content-Type', 'application/json'); // Ensure response is treated as JSON
-      res.setHeader('Content-Disposition', 'inline'); // Prevent file download
-
-      return res.send(savedData); // Send the saved JSON content
-
+      // Send the response back as JSON
+      res.setHeader('Content-Type', 'application/json');
+      return res.send(prettyResponse);
     } else {
+      // If the response isn't JSON, log it and return an error
+      console.error("iTunes API did not return JSON. Response:", response.data);
       return res.status(500).json({
         error: "Unexpected response format",
-        message: "The response from iTunes API was not in expected JSON format."
+        message: "The response from iTunes API was not in expected JSON format.",
+        rawResponse: response.data
       });
     }
   } catch (error) {

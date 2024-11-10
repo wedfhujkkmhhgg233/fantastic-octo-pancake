@@ -72,7 +72,7 @@ const serviceMetadata = {
     author: "Jerome",
     description: "A route to interact with the Stable Diffusion model, generating an image based on a scenic sunset landscape prompt.",
     category: "AI Image Generation",
-    link: ["/sdxl-image?prompt=dog"]
+    link: ["/api/sdxl-image?prompt=dog"]
 }
 
 export { router, serviceMetadata }

@@ -3,9 +3,9 @@ import axios from 'axios'
 
 const router = express.Router()
 
-// Route for Redmond image generation requests
-router.get('/redmond-image', async (req, res) => {
-    const { prompt, prompt_negative } = req.query
+// Route for SDXL image generation requests
+router.get('/sdxl-image', async (req, res) => {
+    const { prompt, guidance, steps } = req.query
 
     if (!prompt) {
         return res.type('json').send(JSON.stringify({
@@ -14,18 +14,17 @@ router.get('/redmond-image', async (req, res) => {
     }
 
     try {
-        // Initial POST request to start image generation with Redmond model
+        // Initial POST request to start image generation with SDXL model
         const result = await axios.post('https://nexra.aryahcr.cc/api/image/complements', {
             prompt: prompt,
-            model: "3d-redmond",
+            model: "sdxl-lora",
             data: {
-                prompt_negative: prompt_negative || ""
+                guidance: parseFloat(guidance) || 0.3,
+                steps: parseInt(steps) || 2
             }
         }, {
             headers: {
-                "Content-Type": "application/json",
-                "x-nexra-user": "user-xxxxxxxx",
-                "x-nexra-secret": "nx-xxxxxxx-xxxxx-xxxxx"
+                'Content-Type': 'application/json'
             }
         })
 
@@ -34,7 +33,7 @@ router.get('/redmond-image', async (req, res) => {
         let data = true
 
         while (data) {
-            // Polling the Redmond API for task completion
+            // Polling the SDXL API for task completion
             response = await axios.get(`http://nexra.aryahcr.cc/api/image/complements/${encodeURIComponent(id)}`)
             response = response.data
             console.log(response)
@@ -47,7 +46,7 @@ router.get('/redmond-image', async (req, res) => {
                     data = false
                     res.type('json').send(JSON.stringify({
                         status: "success",
-                        message: "Image generated successfully by Redmond model.",
+                        message: "Image generated successfully by SDXL model.",
                         data: response
                     }, null, 2))
                     break
@@ -73,11 +72,11 @@ router.get('/redmond-image', async (req, res) => {
 
 // Route metadata
 const serviceMetadata = {
-    name: "Redmond Image Generation API",
+    name: "SDXL Image Generation API",
     author: "Jerome",
-    description: "A route to interact with the Redmond model, generating a 3D image based on a user-provided prompt.",
+    description: "A route to interact with the SDXL model, generating an image based on a futuristic city prompt.",
     category: "AI Image Generation",
-    link: ["/api/redmond-image?prompt=dog"]
+    link: ["/api/sdxl-image?prompt=dog"]
 }
 
 export { router, serviceMetadata }

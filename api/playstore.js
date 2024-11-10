@@ -15,7 +15,7 @@ const serviceMetadata = {
 };
 
 // Define the route for Playstore API
-router.get('/service/playstore', async (req, res) => {
+router.get('/playstore', async (req, res) => {
   const query = req.query.q;
 
   if (!query) {

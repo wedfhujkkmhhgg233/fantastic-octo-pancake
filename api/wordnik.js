@@ -202,7 +202,7 @@ const serviceMetadata = {
   description: 'This service scrapes Wordnik to get information like definitions, etymologies, examples, and more for a given word.',
   category: 'Dictionary API',
   author: 'Jerome Jamis',
-  link: '/api/wordnik-scrape?word=<your-word-here>'
+  link: ["/api/wordnik-scrape?word=<your-word-here>"]
 };
 
 // Exporting the router and service metadata

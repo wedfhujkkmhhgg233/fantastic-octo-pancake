@@ -4,10 +4,32 @@
   "type": "module",
   "main": "mainjerjarjamismiss.js",
   "dependencies": {
-    "express": "^4.17.1",
-    "google-play-scraper": "^8.0.0"
+    "@onepunya/ez-gemini": "^1.3.0-saitekina",
+    "@shuddho11288/sdxl-imagine": "^1.1.0",
+    "axios": "^1.7.7",
+    "betabotz-tools": "^0.0.7",
+    "canvas": "^2.11.2",
+    "cheerio": "^1.0.0",
+    "crypto": "^1.0.1",
+    "discord-image-generation": "^1.4.25",
+    "duckduckgo-search": "^1.0.7",
+    "express": "^4.21.1",
+    "fs": "^0.0.1-security",
+    "fs-extra": "^11.2.0",
+    "google-play-scraper": "^8.1.0",
+    "googlethis": "^1.8.0",
+    "gpt4js": "^1.7.8",
+    "https": "^1.0.0",
+    "nayan-media-downloader": "^2.6.4",
+    "nayan-server": "^2.4.2",
+    "node-superfetch": "^0.3.4",
+    "path": "^0.12.7",
+    "ultimate-guitar": "^1.0.5",
+    "unlimited-ai": "^2.0.2",
+    "xml2js": "^0.6.2"
   },
   "scripts": {
-    "start": "node mainjerjarjamismiss.js"
+    "start": "node mainjerjarjamismiss.js",
+    "build": "npm install express path @onepunya/ez-gemini crypto fs axios ultimate-guitar nayan-media-downloader unlimited-ai duckduckgo-search googlethis google-play-scraper cheerio xml2js betabotz-tools nayan-server fs-extra canvas discord-image-generation node-superfetch https @shuddho11288/sdxl-imagine gpt4js"
   }
 }

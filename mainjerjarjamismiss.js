@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as nekoRouter } from './api/neko.js';
+app.use('/service/api', nekoRouter);
+
 import { router as wattpadRouter } from './api/wattpad.js';
 app.use('/service/api', wattpadRouter);
 

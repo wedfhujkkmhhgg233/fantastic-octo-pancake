@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as itunesRouter } from './api/itunes.js';
+app.use('/service/api', itunesRouter);
+
 import { router as gpt4oRouter } from './api/gpt4o.js';
 app.use('/service/api', gpt4oRouter);
 

@@ -31,7 +31,7 @@ router.get('/playstore', async (req, res) => {
       params: {
         engine: 'google_play',
         q: query,
-        api_key: 'YOUR_SERPAPI_KEY', // Replace with actual SerpApi key
+        api_key: '84c3339ed424b280701ce40bcf789586c4939acf91e406d0de18d0238d8f7422', // Replace with actual SerpApi key
       },
     });
 

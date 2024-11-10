@@ -3,9 +3,9 @@ import axios from 'axios'
 
 const router = express.Router()
 
-// Route for handling MidJourney image generation requests
-router.get('/midjourney-image', async (req, res) => {
-    const { prompt } = req.query
+// Route for SDXL image generation requests
+router.get('/sdxl-image', async (req, res) => {
+    const { prompt, guidance, steps } = req.query
 
     if (!prompt) {
         return res.type('json').send(JSON.stringify({
@@ -14,14 +14,18 @@ router.get('/midjourney-image', async (req, res) => {
     }
 
     try {
-        // Initial POST request to start the image generation
+        // Initial POST request to start image generation with SDXL model
         const result = await axios.post('https://nexra.aryahcr.cc/api/image/complements', {
             prompt: prompt,
-            model: "midjourney",
-            // Uncomment to receive base64 response
-            // response: "base64"
+            model: "sdxl-lora",
+            data: {
+                guidance: parseFloat(guidance) || 0.3,
+                steps: parseInt(steps) || 2
+            }
         }, {
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                'Content-Type': 'application/json'
+            }
         })
 
         const id = result.data.id
@@ -29,7 +33,7 @@ router.get('/midjourney-image', async (req, res) => {
         let data = true
 
         while (data) {
-            // Polling the MidJourney API for task completion
+            // Polling the SDXL API for task completion
             response = await axios.get(`http://nexra.aryahcr.cc/api/image/complements/${encodeURIComponent(id)}`)
             response = response.data
             console.log(response)
@@ -42,7 +46,7 @@ router.get('/midjourney-image', async (req, res) => {
                     data = false
                     res.type('json').send(JSON.stringify({
                         status: "success",
-                        message: "Image generated successfully by MidJourney model.",
+                        message: "Image generated successfully by SDXL model.",
                         data: response
                     }, null, 2))
                     break
@@ -68,11 +72,11 @@ router.get('/midjourney-image', async (req, res) => {
 
 // Route metadata
 const serviceMetadata = {
-    name: "MidJourney Image Generation API",
+    name: "SDXL Image Generation API",
     author: "Jerome",
-    description: "A route to interact with the MidJourney image generation model by providing a prompt.",
+    description: "A route to interact with the SDXL model, generating an image based on a futuristic city prompt.",
     category: "AI Image Generation",
-    link: ["/api/midjourney-image?prompt=dog"]
+    link: ["/sdxl-image?prompt=dog"]
 }
 
 export { router, serviceMetadata }

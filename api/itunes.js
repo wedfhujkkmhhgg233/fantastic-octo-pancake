@@ -1,5 +1,7 @@
 import express from 'express';
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
 
@@ -9,7 +11,7 @@ const serviceMetadata = {
   author: "Jerome Jamis",
   description: "Fetches music search results from iTunes API based on the query term.",
   category: "Music",
-  link: ["/api/itunes?term=Faded Alan Walker &media=&limit="]
+  link: ["/api/itunes?term=Faded Alan Walker&media=&limit="]
 };
 
 // Define the iTunes search route
@@ -36,23 +38,35 @@ router.get('/itunes', async (req, res) => {
         term: term,
         media: searchMedia,
         limit: searchLimit
-      }
+      },
+      responseType: 'arraybuffer' // Download the content as a binary stream
     });
 
-    // Ensure response is in JSON format
-    if (response.headers['content-type'].includes('application/json')) {
+    // Ensure response is received as a file
+    if (response.data) {
+      // Write the downloaded content to a file (itunes.json)
+      const filePath = path.join(__dirname, 'itunes.json');
+      fs.writeFileSync(filePath, response.data);  // Save the raw response
+
+      // Read the saved JSON file and parse it
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      const parsedContent = JSON.parse(fileContent); // Parse it as JSON
+
+      // Send the formatted response
       const prettyResponse = JSON.stringify({
         metadata: serviceMetadata,
-        resultCount: response.data.resultCount,
-        results: response.data.results
+        resultCount: parsedContent.resultCount,
+        results: parsedContent.results
       }, null, 2); // Pretty print with 2-space indentation
 
-      res.setHeader('Content-Type', 'application/json'); // Ensure the response is JSON
+      // Set the Content-Type header to application/json
+      res.setHeader('Content-Type', 'application/json'); 
+
       return res.send(prettyResponse);
     } else {
       return res.status(500).json({
-        error: "Unexpected response format",
-        message: "The response from iTunes API was not in expected JSON format."
+        error: "No data received",
+        message: "No data was received from the iTunes API."
       });
     }
   } catch (error) {

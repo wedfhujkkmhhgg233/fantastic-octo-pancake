@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as memeRouter } from './api/meme.js';
+app.use('/service/api', memeRouter);
+
 import { router as whoaRouter } from './api/whoa.js';
 app.use('/service/api', whoaRouter);
 

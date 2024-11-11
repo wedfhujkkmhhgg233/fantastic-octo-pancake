@@ -41,7 +41,7 @@ const serviceMetadata = {
     name: "DuckDuckGo Search",
     author: "Jerome",
     description: "Search for a topic on DuckDuckGo",
-    category: "tools",
+    category: "Search",
     link: ["/api/search?query=who%20is%20Jose%20Rizal"]
 };
 

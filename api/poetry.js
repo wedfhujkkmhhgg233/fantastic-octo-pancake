@@ -61,7 +61,7 @@ const serviceMetadata = {
     name: "Poetry API",
     author: "Jerome-Web",
     description: "Fetches poems by title, author, or random selection",
-    category: "Literature",
+    category: "Search",
     link: ["/api/poetry?type=&titleorauthor="]
 };
 

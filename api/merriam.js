@@ -61,7 +61,7 @@ const serviceMetadata = {
     name: "Merriam-Webster Scraper",
     author: "Jerome",
     description: "Fetch word details, definitions, and parts of speech from Merriam-Webster API",
-    category: "dictionary",
+    category: "Search",
     link: ["/api/merriam?word=example"]
 };
 

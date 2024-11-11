@@ -29,7 +29,7 @@ const serviceMetadata = {
     name: "Media Downloader",
     author: "Jerome",
     description: "Downloads media from various platforms.",
-    category: "Media",
+    category: "Downloader",
     link: ["/api/alldl?url="]
 };
 

@@ -8,7 +8,7 @@ const serviceMetadata = {
     name: 'neko',
     author: 'Jerome Jamis',
     description: 'Fetches neko images or gifs (based on type) from the nekos.best API.',
-    category: 'fun',
+    category: 'Others',
     link: ["/api/neko?type=&amount=<amount>"]  // Simplified the link format
 };
 

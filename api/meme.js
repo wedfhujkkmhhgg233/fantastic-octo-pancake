@@ -13,7 +13,7 @@ const serviceMetadata = {
 };
 
 // Random Meme Route
-router.get('/random', async (req, res) => {
+router.get('/random-meme', async (req, res) => {
     try {
         const response = await axios.get('https://api.imgflip.com/get_memes');
         

@@ -56,7 +56,7 @@ const serviceMetadata = {
     name: "arXiv Article Fetcher",
     author: "Jerome",
     description: "Fetches and parses arXiv article data.",
-    category: "Academic",
+    category: "Search",
     link: ["/api/arxiv?query="]
 };
 

@@ -56,7 +56,7 @@ const serviceMetadata = {
     name: "Wiktionary API",
     author: "Jerome",
     description: "Fetch word details from Wiktionary API",
-    category: "dictionary",
+    category: "Search",
     link: ["/api/wiktionary?word=example"]
 };
 

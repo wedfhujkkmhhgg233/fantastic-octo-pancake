@@ -13,7 +13,7 @@ const serviceMetadata = {
 };
 
 // Movie Whoa Route
-router.get('/random', async (req, res) => {
+router.get('/movie-whoa/random', async (req, res) => {
     try {
         const response = await axios.get('https://whoa.onrender.com/whoas/random');
         

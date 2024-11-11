@@ -69,7 +69,7 @@ const serviceMetadata = {
     name: "Case Converter",
     author: "Jerome",
     description: "Converts text into various cases based on the specified type.",
-    category: "text-manipulation",
+    category: "Others",
     link: ["/api/case?convert=hello%20world&type=uppercase"]
 };
 

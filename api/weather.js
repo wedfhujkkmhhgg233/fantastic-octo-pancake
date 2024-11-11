@@ -34,8 +34,8 @@ const serviceMetadata = {
     name: "Weather",
     author: "Jerome Jamis",
     description: "Fetches and displays current weather for a specified location",
-    category: "Weather",
-    link: ["/api/weather?q=<YOUR_LOCATION>"]
+    category: "Others",
+    link: ["/api/weather?q=Manila"]
 };
 
 export { router, serviceMetadata };

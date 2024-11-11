@@ -1,5 +1,5 @@
 import express from 'express';
-import youtubesearchapi from 'youtube-search-api';
+import youtubesearchapi from 'ruhend-scraper';
 
 const router = express.Router();
 
@@ -7,14 +7,14 @@ const router = express.Router();
 const serviceMetadata = {
     name: 'YouTube Search',
     author: 'Jerome Jamis',
-    description: 'Fetches videos from YouTube based on search keywords.',
+    description: 'Fetches YouTube videos and channels based on search keywords.',
     category: 'Search',
-    link: ["/api/youtube-search?keywords=&playlist=&limit=&type="]
+    link: ["/api/youtube-search?keywords="]
 };
 
 // YouTube Search Route
 router.get('/youtube-search', async (req, res) => {
-    const { keywords, playlist = 'false', limit = 5, type = 'video' } = req.query;
+    const { keywords } = req.query;
 
     if (!keywords) {
         return res.status(400).json({
@@ -24,28 +24,48 @@ router.get('/youtube-search', async (req, res) => {
                 
                 Guide:
                 - 'keywords' (required): The search term you want to search on YouTube. Example: ?keywords=cat
-                - 'playlist' (optional): Include playlists (true or false). Default: false.
-                - 'limit' (optional): The number of results to return. Default: 5.
-                - 'type' (optional): Type of content (video, channel, playlist, movie). Default: video.
                 
-                Full example: /api/youtube-search?keywords=cat&playlist=false&limit=5&type=video
+                Full example: /api/youtube-search?keywords=cat
             `
         });
     }
 
     try {
-        const response = await youtubesearchapi.GetListByKeyword(
-            keywords,
-            playlist === 'true',
-            parseInt(limit, 10),
-            [{ type }]
-        );
+        const { video, channel } = await youtubesearchapi.ytsearch(keywords);
+        
+        // Format the video and channel data
+        const formattedData = [...video, ...channel].map((v) => {
+            switch (v.type) {
+                case 'video':
+                    return {
+                        type: 'video',
+                        title: v.title,
+                        url: v.url,
+                        duration: v.durationH,
+                        uploaded: v.publishedTime,
+                        views: v.view
+                    };
+                case 'channel':
+                    return {
+                        type: 'channel',
+                        channelName: v.channelName,
+                        url: v.url,
+                        subscribers: v.subscriberH,
+                        videoCount: v.videoCount
+                    };
+                default:
+                    return null;
+            }
+        }).filter(Boolean);
 
-        res.type('json').send(JSON.stringify({
+        const responseMessage = JSON.stringify({
             success: true,
             message: "YouTube search results fetched successfully",
-            data: response.items
-        }, null, 2));
+            data: formattedData
+        }, null, 2);
+
+        res.type('json').send(responseMessage);
+
     } catch (error) {
         res.status(500).json({
             success: false,

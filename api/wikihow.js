@@ -59,7 +59,7 @@ const serviceMetadata = {
     name: "wikiHow API",
     author: "Jerome",
     description: "Fetch article details from wikiHow API",
-    category: "how-to",
+    category: "Search",
     link: ["/api/wikihow?title=how-to-do-something"]
 };
 

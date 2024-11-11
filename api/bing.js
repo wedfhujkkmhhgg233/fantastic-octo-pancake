@@ -35,7 +35,7 @@ const serviceMetadata = {
     name: "Imagine",
     author: "Jerome",
     description: "Image generator",
-    category: "Image",
+    category: "AI Image Generation",
     link: ["/api/bing?prompt="]
 };
 

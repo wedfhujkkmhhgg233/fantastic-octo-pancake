@@ -53,7 +53,7 @@ const serviceMetadata = {
     name: "Citizendium Scraper",
     author: "Jerome",
     description: "Scrape information from Citizendium based on a specified word",
-    category: "encyclopedia",
+    category: "Search",
     link: ["/api/citizendium?word=cat"]
 };
 

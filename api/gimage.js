@@ -41,7 +41,7 @@ const serviceMetadata = {
     name: "Google Image Search",
     author: "Jerome",
     description: "Search for images using Google",
-    category: "tools",
+    category: "Search",
     link: ["/api/gimage?query=dog&count=5"]
 };
 

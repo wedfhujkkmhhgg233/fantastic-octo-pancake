@@ -59,7 +59,7 @@ const serviceMetadata = {
     name: "YTS Movie Search",
     author: "Jerome",
     description: "Searches movies on YTS by query term.",
-    category: "Movie Search",
+    category: "Search",
     link: ["/api/yts-movie-search?query=<QUERY>&count=<NUMBER>"]
 };
 

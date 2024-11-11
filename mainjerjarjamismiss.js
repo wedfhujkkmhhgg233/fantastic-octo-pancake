@@ -112,6 +112,15 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as movieinfov1Router } from './api/movieinfov1.js';
+app.use('/service/api', movieinfov1Router);
+
+import { router as movieinfov2Router } from './api/movieinfov2.js';
+app.use('/service/api', movieinfov2Router);
+
+import { router as movieinfov3Router } from './api/movieinfov3.js';
+app.use('/service/api', movieinfov3Router);
+
 import { router as nekoRouter } from './api/neko.js';
 app.use('/service/api', nekoRouter);
 

@@ -28,7 +28,7 @@ router.get('/movieinfo/v1', async (req, res) => {
         url: 'https://movie-info-api.p.rapidapi.com/movie-info',
         params: { title, lang, max_results },
         headers: {
-            'x-rapidapi-key': 'YOUR_RAPIDAPI_KEY',
+            'x-rapidapi-key': 'fb9b4c19c8msh9d206a87805e016p1c3debjsnfc15481f4f3b',
             'x-rapidapi-host': 'movie-info-api.p.rapidapi.com'
         }
     };

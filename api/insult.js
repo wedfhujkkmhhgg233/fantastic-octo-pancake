@@ -8,7 +8,7 @@ const serviceMetadata = {
   name: "Evil Insult Generator",
   author: "Jerome Jamis",
   description: "Generates a random evil insult",
-  category: "Fun",
+  category: "Others",
   link: ["/api/evilinsult"]
 };
 

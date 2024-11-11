@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as waifuRouter } from './api/waifu.js';
+app.use('/service/api', waifuRouter);
+
 import { router as dictionaryRouter } from './api/dictionary.js';
 app.use('/service/api', dictionaryRouter);
 

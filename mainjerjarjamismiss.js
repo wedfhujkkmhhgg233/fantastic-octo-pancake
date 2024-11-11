@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as youtubesearchRouter } from './api/youtubesearch.js';
+app.use('/service/api', youtubesearchRouter);
+
 import { router as movieinfov1Router } from './api/movieinfov1.js';
 app.use('/service/api', movieinfov1Router);
 

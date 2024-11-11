@@ -56,7 +56,7 @@ const serviceMetadata = {
     name: "PeakPX Wallpaper Search",
     author: "Jerome",
     description: "Searches wallpapers on PeakPX by keyword.",
-    category: "Image Search",
+    category: "Search",
     link: ["/api/peakpx?query="]
 };
 

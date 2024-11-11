@@ -9,7 +9,7 @@ const serviceMetadata = {
   name: "Wattpad Story Scraper",
   author: "Jerome Jamis",
   description: "Fetches Wattpad story information, including reading chapters, getting story parts, and searching for stories.",
-  category: "Books",
+  category: "Search",
   link: ["/api/wattpad?type=search&query=example", "/api/wattpad?type=story-parts&url=https://www.wattpad.com/story/example", "/api/wattpad?type=read-chapter&url=https://www.wattpad.com/story/example/chapter/example"]
 };
 

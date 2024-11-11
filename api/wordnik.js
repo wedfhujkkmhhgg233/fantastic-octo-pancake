@@ -200,7 +200,7 @@ router.get('/wordnik-scrape', async (req, res) => {
 const serviceMetadata = {
   name: 'Wordnik Scraper',
   description: 'This service scrapes Wordnik to get information like definitions, etymologies, examples, and more for a given word.',
-  category: 'Dictionary API',
+  category: 'Search',
   author: 'Jerome Jamis',
   link: ["/api/wordnik-scrape?word=<your-word-here>"]
 };

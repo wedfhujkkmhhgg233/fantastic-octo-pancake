@@ -43,7 +43,7 @@ const serviceMetadata = {
     name: "Prodia Image Generation",
     author: "Jerome",
     description: "Generates images using the Prodia API based on text prompts.",
-    category: "Image Generation",
+    category: "AI Image Generation",
     link: ["/api/prodia?prompt="]
 };
 

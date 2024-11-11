@@ -66,7 +66,7 @@ const serviceMetadata = {
     name: "Numbers to Words",
     author: "Jerome",
     description: "Converts numbers into words.",
-    category: "text-manipulation",
+    category: "Others",
     link: ["/api/numbers?numbers=123%20456%20789"]
 };
 

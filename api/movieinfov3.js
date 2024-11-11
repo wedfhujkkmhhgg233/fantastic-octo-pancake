@@ -8,7 +8,7 @@ const serviceMetadata = {
     name: 'MovieInfo - V3',
     author: 'Jerome Jamis',
     description: 'Fetches movie information using V3 of the MovieInfo API.',
-    category: 'entertainment',
+    category: 'Search',
     link: ["/api/movieinfo/v3?title="]
 };
 

@@ -30,7 +30,7 @@ const serviceMetadata = {
     name: "Eric AI",
     author: "Eric",
     description: "Fetches educational resources from the ERIC database",
-    category: "Academic",
+    category: "Search",
     link: ["/api/eric?search=&rows="]
 };
 

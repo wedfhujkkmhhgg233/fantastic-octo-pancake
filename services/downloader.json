@@ -2,6 +2,6 @@
     "name": "downloader",
     "author": "lance cochangco",
     "description": "video downloader",
-    "category": "media",
+    "category": "Downloader",
     "link": ["/downloader"]
 }

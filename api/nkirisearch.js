@@ -58,7 +58,7 @@ const serviceMetadata = {
     name: "Nkiri Movie & TV Series Search",
     author: "Jerome",
     description: "Searches for movies and TV series on Nkiri by query term.",
-    category: "Movie & TV Series Search",
+    category: "Search",
     link: ["/api/nkiri-search?query=Spiderman&count=10"]
 };
 

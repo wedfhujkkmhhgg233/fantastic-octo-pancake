@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jerome Rest API Documentation</title>
+    <title>Jerome Jamis API</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
@@ -12,239 +12,79 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- Ionicons for additional icons -->
     <link href="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/css/ionicons.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #f0f2f5;
-            --text-color: #050505;
-            --secondary-text: #606770;
-            --primary-color: #1877f2;
-            --container-bg: #ffffff;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --border-radius: 8px;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: auto;
-            padding: 2rem;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            color: var(--primary-color);
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .lead {
-            color: var(--secondary-text);
-            font-size: 1rem;
-        }
-
-        #MyClockDisplay, #PingDisplay {
-            color: var(--secondary-text);
-            font-size: 0.9rem;
-        }
-
-        .category {
-            background-color: var(--container-bg);
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 8px var(--shadow-color);
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            transition: box-shadow 0.3s;
-        }
-
-        .category:hover {
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .category h2 {
-            font-size: 1.4rem;
-            color: var(--primary-color);
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .endpoint {
-            padding: 1rem;
-            margin: 0.5rem 0;
-            background-color: #fafafa;
-            border: 1px solid #e0e0e0;
-            border-radius: var(--border-radius);
-        }
-
-        .endpoint-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .endpoint-name {
-            font-weight: 600;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            color: var(--text-color);
-        }
-
-        .endpoint-method {
-            color: var(--primary-color);
-            font-size: 0.8rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            background-color: #eef3fb;
-        }
-
-        .endpoint p {
-            font-size: 0.95rem;
-            color: var(--secondary-text);
-            margin: 0.5rem 0;
-        }
-
-        .endpoint-action {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-            padding: 0.4rem 0.8rem;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-            display: inline-block;
-        }
-
-        .endpoint-action:hover {
-            background-color: #e0e7ff;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 2rem;
-            font-size: 0.9rem;
-            color: var(--secondary-text);
-        }
-
-        .icon {
-            color: var(--primary-color);
-            margin-right: 0.3rem;
-        }
-    </style>
+    <link href="styles.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.9/dist/sweetalert2.all.min.js"></script>
 </head>
 <body>
+    <div class="open-burger-btn" onclick="toggleBurgerMenu()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="burger-overlay" onclick="toggleBurgerMenu()"></div>
+
+    <div class="burger-menu" id="burgerMenu">
+        <div class="burger-header">
+            <h2>Jerome Jamis API</h2>
+            <i class="fas fa-times" onclick="toggleBurgerMenu()" style="cursor: pointer;"></i>
+        </div>
+        <div id="categoryList">
+            <!-- Categories will be dynamically loaded here -->
+        </div>
+    </div>
+
     <div class="container">
         <header class="header">
-            <h1>Jerome Rest API Documentation <i class="fas fa-book icon"></i></h1>
+            <h1>Jerome Jamis API <i class="fas fa-book icon"></i></h1>
             <p class="lead">Welcome to the API documentation for Jerome's RESTful services.</p>
             <div id="MyClockDisplay"></div>
-            <div id="PingDisplay"></div>
         </header>
 
-        <section id="api-content">
-            <!-- API categories and endpoints will be dynamically loaded here -->
+        <!-- Step-by-step guide section -->
+        <section id="guide" class="guide-section rounded-container mb-4">
+            <h3><i class="fas fa-book-open"></i> Step-by-Step Guide</h3>
+            <ol>
+                <li>Navigate through the API categories on the left sidebar.</li>
+                <li>Select an endpoint to view its details and usage.</li>
+                <li>Click on the endpoint name to be redirected to the service.</li>
+                <li>All services are accessible without any API key or login.</li>
+            </ol>
+        </section>
+
+        <!-- Terms of Service section -->
+        <section id="terms" class="terms-section rounded-container mb-4">
+            <h3><i class="fas fa-file-contract"></i> Terms of Service</h3>
+            <p>By using this API, you agree to the terms outlined below:</p>
+            <ul>
+                <li>Do not abuse the API by making excessive requests in a short period of time.</li>
+                <li>This API is free to use without requiring an API key or login.</li>
+                <li>All services are provided as-is, without any warranties or guarantees.</li>
+            </ul>
+        </section>
+
+        <!-- Endpoint and Category Count -->
+        <section id="dashboard" class="rounded-container mb-4">
+            <p id="category-count"><i class="fas fa-folder"></i> Total Categories: 0</p>
+            <p id="endpoint-count"><i class="fas fa-plug"></i> Total Endpoints: 0</p>
         </section>
 
         <footer>
-            <p id="category-count"></p>
-            <p id="endpoint-count"></p>
-            <p>&copy; 2024 Jerome Jamis. All rights reserved.</p>
+            <p>&copy; <span id="year"></span> Jerome Jamis. All rights reserved.</p>
         </footer>
     </div>
 
     <!-- Scripts -->
+    <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Welcome SweetAlert -->
     <script>
-        function showTime() {
-            const date = new Date();
-            let h = date.getHours();
-            let m = date.getMinutes();
-            let s = date.getSeconds();
-            h = h < 10 ? "0" + h : h;
-            m = m < 10 ? "0" + m : m;
-            s = s < 10 ? "0" + s : s;
-            const time = h + ":" + m + ":" + s;
-            document.getElementById("MyClockDisplay").innerText = `Current Time: ${time}`;
-            setTimeout(showTime, 1000);
-        }
-        showTime();
-
-        async function fetchPing() {
-            const startTime = Date.now();
-            try {
-                await fetch('/');
-                const endTime = Date.now();
-                const ping = endTime - startTime;
-                document.getElementById('PingDisplay').innerText = `Server Ping: ${ping} ms`;
-            } catch (error) {
-                document.getElementById('PingDisplay').innerText = `Ping: Error`;
-            }
-            setTimeout(fetchPing, 1000);
-        }
-        fetchPing();
-
-        async function fetchApiEndpoints() {
-            const response = await fetch('/service-list');
-            return response.json();
-        }
-
-        function populateApiContent(endpoints) {
-            const apiContent = document.getElementById('api-content');
-            const categories = {};
-            let totalEndpoints = 0;
-
-            endpoints.forEach(endpoint => {
-                if (!categories[endpoint.category]) {
-                    categories[endpoint.category] = [];
-                }
-                categories[endpoint.category].push(endpoint);
-                totalEndpoints++;
-            });
-
-            for (const [category, apiList] of Object.entries(categories)) {
-                const categorySection = document.createElement('div');
-                categorySection.className = 'category';
-                categorySection.innerHTML = `<h2><i class="fas fa-folder-open icon"></i>${category}</h2>`;
-
-                apiList.forEach(api => {
-                    const endpoint = document.createElement('div');
-                    endpoint.className = 'endpoint';
-                    endpoint.innerHTML = `
-                        <div class="endpoint-header">
-                            <span class="endpoint-name"><i class="fas fa-plug icon"></i>${api.name}</span>
-                            <span class="endpoint-method">${api.link[0]}</span>
-                        </div>
-                        <p>${api.description}</p>
-                        <span><i class="ion-ios-person icon"></i>Author: ${api.author}</span>
-                        <div>
-                            <a href="${api.link[0].replace('/api/', '/service/api/')}" class="endpoint-action">Get</a>
-                            <a href="${api.link[0].replace('/api/', '/service/api/')}" class="endpoint-action">Try it now</a>
-                        </div>
-                    `;
-                    categorySection.appendChild(endpoint);
-                });
-
-                apiContent.appendChild(categorySection);
-            }
-
-            document.getElementById('category-count').innerText = `Total Categories: ${Object.keys(categories).length}`;
-            document.getElementById('endpoint-count').innerText = `Total Endpoints: ${totalEndpoints}`;
-        }
-
-        fetchApiEndpoints()
-            .then(endpoints => populateApiContent(endpoints))
-            .catch(error => console.error('Error fetching API endpoints:', error));
+        Swal.fire({
+            title: 'Welcome to Jerome Jamis API!',
+            text: 'Explore the documentation and start using the available services.',
+            icon: 'info',
+            confirmButtonText: 'Got it!'
+        });
     </script>
 </body>
-        </html>
+</html>

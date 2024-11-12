@@ -10,7 +10,7 @@ const serviceMetadata = {
     name: "Facebook UID Getter",
     description: "Lookup Facebook User ID from a URL, such as a Facebook profile.",
     category: "Search",
-    usage: ["/api/fb?url=https://www.facebook.com/JeromeExpertise"],
+    link: ["/api/fb?url=https://www.facebook.com/JeromeExpertise"],
     method: "GET"
 };
 

@@ -18,7 +18,7 @@ function toggleBurgerMenu() {
 document.getElementById('year').innerText = new Date().getFullYear();
 
 async function fetchApiEndpoints() {
-    const response = await fetch('https://jerome-web.gleeze.com/service-list');
+    const response = await fetch('/service-list');
     return response.json();
 }
 

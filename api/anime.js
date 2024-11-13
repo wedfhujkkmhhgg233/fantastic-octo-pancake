@@ -13,7 +13,7 @@ const serviceMetadata = {
     name: "anime-quotes",
     author: "Jerome Jamis",
     description: "Fetches a random anime quote from a data file.",
-    category: "Anime Quotes",
+    category: "Others",
     link: ["/api/anime-quotes"],
 };
 
@@ -28,18 +28,21 @@ router.get('/anime-quotes', async (req, res) => {
         // Select a random quote from the data
         const randomQuote = data[Math.floor(Math.random() * data.length)];
 
-        res.json({
+        // Return the response with pretty JSON formatting
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send(JSON.stringify({
             success: true,
             message: "Random quote fetched successfully.",
             data: randomQuote
-        });
+        }, null, 2));  // Pretty JSON formatting with 2-space indentation
     } catch (error) {
         console.error("Error fetching quote:", error);
-        res.status(500).json({
+        res.setHeader('Content-Type', 'application/json');
+        res.status(500).send(JSON.stringify({
             success: false,
             message: "An error occurred while fetching the quote.",
             error: error.message
-        });
+        }, null, 2));  // Pretty JSON formatting with 2-space indentation
     }
 });
 

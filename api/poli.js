@@ -2,8 +2,12 @@ import express from 'express';
 import axios from 'axios';
 import fs from 'fs-extra';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const router = express.Router();
+
+// Define __dirname for ES modules
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Route metadata
 const serviceMetadata = {

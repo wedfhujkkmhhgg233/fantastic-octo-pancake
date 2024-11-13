@@ -1,12 +1,8 @@
 import express from 'express';
 import fs from 'fs-extra';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 const router = express.Router();
-
-// Define __dirname for ES modules
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Route metadata
 const serviceMetadata = {
@@ -19,7 +15,7 @@ const serviceMetadata = {
 
 // Route to fetch a random anime quote
 router.get('/anime-quotes', async (req, res) => {
-    const dataFilePath = path.join(__dirname, 'data.json');
+    const dataFilePath = path.join(process.cwd(), 'data.json'); // Main directory path
 
     try {
         // Load and parse the JSON data

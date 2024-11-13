@@ -8,9 +8,9 @@ const router = express.Router();
 // Route metadata
 const serviceMetadata = {
     name: "genmage",
-    author: "jameslim",
+    author: "Jerome Jamis",
     description: "Generate AI images based on a text prompt.",
-    category: "create-images",
+    category: "AI Image Generation",
     link: ["/api/genmage?text=dog"],
 };
 

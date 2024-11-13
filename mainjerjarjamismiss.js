@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as poliRouter } from './api/poli.js';
+app.use('/service/api', poliRouter);
+
 import { router as ageRouter } from './api/age.js';
 app.use('/service/api', ageRouter);
 

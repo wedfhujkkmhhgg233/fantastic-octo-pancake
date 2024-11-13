@@ -7,7 +7,7 @@ const serviceMetadata = {
     name: "Age Calculator",
     author: "Jerome Jamis",
     description: "Calculates age in years, months, and days based on birthdate provided as separate year, month, and date fields.",
-    category: "Utilities",
+    category: "Others",
     link: ["/api/age-calculate?year=&month=&date="]
 };
 

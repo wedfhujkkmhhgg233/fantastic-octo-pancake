@@ -1,43 +1,61 @@
 import express from 'express';
-import axios from 'axios';
-import * as cheerio from 'cheerio';
+import puppeteer from 'puppeteer';
 
 const router = express.Router();
 
 const serviceMetadata = {
-  name: 'Refseek Search',
+  name: 'Refseek PDF Search',
   author: 'Jerome',
-  description: 'Search for documents on Refseek based on a search term.',
+  description: 'Search for PDF documents on Refseek based on a search term.',
   category: 'Search',
-  link: ['/api/refseeksearch?prompt=dog']
+  link: ['/api/refseekpdfsearch?prompt=dog']
 };
 
-const url = 'https://www.refseek.com/documents';
-
-// Function to perform the Refseek search
-async function fetchRefseekResults(query) {
+// Function to scrape PDF links and titles using Puppeteer
+async function scrapePDFLinksAndTitles(searchQuery) {
   try {
-    const response = await axios.get(`${url}?search=${encodeURIComponent(query)}`);
-    const html = response.data;
+    // Initialize Puppeteer and launch the browser
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
 
-    // Parse the HTML response with Cheerio
-    const $ = cheerio.load(html);
+    // Replace spaces with '+' for URL encoding
+    const query = searchQuery.replace(/\s+/g, '+');
+    const url = `https://www.refseek.com/documents?search=${query}`;
 
-    // Extract search results
-    const results = $('.search__result').map((index, element) => ({
-      title: $(element).find('.result__title').text().trim(),
-      link: $(element).find('a').attr('href'),
-      description: $(element).find('.result__description').text().trim(),
-    })).get();
+    // Navigate to the page and wait for the content to load
+    await page.goto(url, { waitUntil: 'networkidle0' });
 
-    return results;
+    // Extract the required information (PDF links, titles, and descriptions)
+    const pdfDocuments = await page.evaluate(() => {
+      const results = [];
+      // Scrape each search result element
+      const items = document.querySelectorAll('.search__result');
+      items.forEach(item => {
+        const linkElement = item.querySelector('a');
+        const link = linkElement ? linkElement.href : '';
+        const title = item.querySelector('.result__title') ? item.querySelector('.result__title').innerText : 'No title available';
+        const description = item.querySelector('.result__description') ? item.querySelector('.result__description').innerText : 'No description available';
+
+        // Only include PDF links
+        if (link && link.endsWith('.pdf')) {
+          results.push({ title, description, link });
+        }
+      });
+      return results;
+    });
+
+    // Close the browser
+    await browser.close();
+
+    // Return the results
+    return pdfDocuments;
   } catch (error) {
-    throw new Error(`Error fetching data from Refseek: ${error.message}`);
+    throw new Error(`Error fetching PDF links and titles: ${error.message}`);
   }
 }
 
-// Route for Refseek search
-router.get('/refseeksearch', async (req, res) => {
+// Route for Refseek PDF search
+router.get('/refseekpdfsearch', async (req, res) => {
   const { prompt } = req.query;
 
   if (!prompt) {
@@ -45,12 +63,12 @@ router.get('/refseeksearch', async (req, res) => {
   }
 
   try {
-    const results = await fetchRefseekResults(prompt);
+    const results = await scrapePDFLinksAndTitles(prompt);
 
     // Pretty-print JSON response
     res.json(JSON.parse(JSON.stringify({ metadata: serviceMetadata, data: results }, null, 2)));
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve data from Refseek', details: error.message });
+    res.status(500).json({ error: 'Failed to retrieve PDF data from Refseek', details: error.message });
   }
 });
 

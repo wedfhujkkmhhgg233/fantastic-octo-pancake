@@ -1,5 +1,5 @@
 import express from 'express';
-import math from 'mathjs';
+import { simplify, gcd, lcm } from 'mathjs'; // Named imports instead of default import
 
 const router = express.Router();
 
@@ -44,7 +44,7 @@ function performMathOperation(operation, num1, num2) {
 // Algebraic simplification function using mathjs
 function simplifyExpression(expression) {
   try {
-    return math.simplify(expression).toString();
+    return simplify(expression).toString();
   } catch (error) {
     throw new Error('Invalid algebraic expression.');
   }
@@ -52,11 +52,11 @@ function simplifyExpression(expression) {
 
 // Helper functions for GCF and LCM
 function calculateGCF(num1, num2) {
-  return math.gcd(num1, num2);
+  return gcd(num1, num2);
 }
 
 function calculateLCM(num1, num2) {
-  return math.lcm(num1, num2);
+  return lcm(num1, num2);
 }
 
 // Math operation route

@@ -71,7 +71,7 @@ async function scrapePdfSearch(query, pages = 1) {
 }
 
 // Route for PDF search
-router.get('/api/pdfsearch', async (req, res) => {
+router.get('/pdfsearch', async (req, res) => {
   const { prompt, page } = req.query;
 
   if (!prompt || !page) {

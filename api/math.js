@@ -1,91 +1,115 @@
 import express from 'express';
-import axios from 'axios';
-import fs from 'fs-extra';
+import math from 'mathjs';
 
 const router = express.Router();
-const key = "KK9Q6W-RPRTXQX2RY"; // New WolframAlpha API key
 
+// Metadata for the service
 const serviceMetadata = {
-  name: 'Math Calculator',
+  name: 'Advanced Math Calculator',
   author: 'Jerome',
-  description: 'Perform various math operations like solving equations, plotting graphs, and more.',
-  category: 'Others',
-  link: ['/api/math?prompt=1+1']
+  description: 'Performs basic math operations, algebraic simplification, GCF, and LCM calculations.',
+  category: 'Math',
+  link: ['/api/math?operation=add&num1=5&num2=3']  // Example query link for addition
 };
 
-// Function to handle WolframAlpha queries
-async function wolframQuery(query) {
+// Helper function for basic operations
+function performMathOperation(operation, num1, num2) {
+  let result;
+  switch (operation) {
+    case 'add':
+    case '+':
+      result = num1 + num2;
+      break;
+    case 'subtract':
+    case '-':
+      result = num1 - num2;
+      break;
+    case 'multiply':
+    case '×':
+      result = num1 * num2;
+      break;
+    case 'divide':
+    case '÷':
+      if (num2 === 0) {
+        throw new Error('Division by zero is not allowed.');
+      }
+      result = num1 / num2;
+      break;
+    default:
+      throw new Error('Invalid operation. Supported operations are: add, subtract, multiply, divide.');
+  }
+  return result;
+}
+
+// Algebraic simplification function using mathjs
+function simplifyExpression(expression) {
   try {
-    const res = await axios.get(`http://api.wolframalpha.com/v2/query?appid=${key}&input=${encodeURIComponent(query)}&output=json`);
-    return res.data.queryresult;
+    return math.simplify(expression).toString();
   } catch (error) {
-    throw new Error('Error querying WolframAlpha API: ' + error.message);
+    throw new Error('Invalid algebraic expression.');
   }
 }
 
-// Route to handle math operations (calculation, graphing, etc.)
-router.get('/math', async (req, res) => {
-  const { prompt } = req.query;
-  if (!prompt) {
-    return res.status(400).json({
-      error: 'Please provide a search query with the "prompt" parameter.',
-      metadata: serviceMetadata
-    });
+// Helper functions for GCF and LCM
+function calculateGCF(num1, num2) {
+  return math.gcd(num1, num2);
+}
+
+function calculateLCM(num1, num2) {
+  return math.lcm(num1, num2);
+}
+
+// Math operation route
+router.get('/math', (req, res) => {
+  const { operation, num1, num2, expression } = req.query;
+
+  // Validate basic operation parameters
+  if (!operation && !expression && (num1 === undefined || num2 === undefined)) {
+    return res.status(400).send(JSON.stringify({ error: 'Please provide valid operation or expression.' }, null, 2));
   }
 
-  let responseJson = {
-    metadata: serviceMetadata,
-    data: null,
-  };
-
   try {
-    if (prompt.indexOf('-p') === 0) {
-      // Handle primitive calculation or integration
-      const content = "primitive " + prompt.slice(3);
-      const result = await wolframQuery(content);
-      responseJson.data = result.pods.find(pod => pod.id === 'IndefiniteIntegral')?.subpods[0].plaintext || 'No result found';
-    } else if (prompt.indexOf('-g') === 0) {
-      // Handle graph plotting
-      const content = "plot " + prompt.slice(3);
-      const result = await wolframQuery(content);
-      const plotSrc = result.pods.find(pod => pod.id === 'Plot')?.subpods[0].img.src || result.pods.find(pod => pod.id === 'ImplicitPlot')?.subpods[0].img.src;
-      
-      if (plotSrc) {
-        const img = (await axios.get(plotSrc, { responseType: 'stream' })).data;
-        img.pipe(fs.createWriteStream('./graph.png')).on('close', () => {
-          res.json({ body: 'Graph Image:', attachment: fs.createReadStream('./graph.png') });
-          fs.unlinkSync('./graph.png');
-        });
-        return;
-      }
-      responseJson.data = 'No graph found';
-    } else if (prompt.indexOf('-v') === 0) {
-      // Handle vector operations
-      const content = "vector " + prompt.slice(3).replace(//g, "<").replace(//g, ">");
-      const result = await wolframQuery(content);
-      const vectorLength = result.pods.find(pod => pod.id === 'VectorLength')?.subpods[0].plaintext || 'N/A';
-      const vectorResult = result.pods.find(pod => pod.id === 'Result')?.subpods[0].plaintext || 'No result found';
-
-      responseJson.data = `${vectorResult}\nVector Length: ${vectorLength}`;
-    } else {
-      // Default math operations (solving equations, etc.)
-      const result = await wolframQuery(prompt);
-      const solution = result.pods.find(pod => pod.id === 'Solution');
-      
-      if (solution) {
-        responseJson.data = solution.subpods.map(subpod => subpod.plaintext).join("\n");
-      } else {
-        responseJson.data = 'No solution found';
-      }
+    if (expression) {
+      // Algebraic simplification
+      const result = simplifyExpression(expression);
+      res.send(JSON.stringify({ metadata: serviceMetadata, result: result }, null, 2));
+      return;
     }
 
-    // Send the response as a pretty-printed JSON string
-    res.json(JSON.parse(JSON.stringify(responseJson, null, 2)));
+    if (num1 !== undefined && num2 !== undefined) {
+      const number1 = parseFloat(num1);
+      const number2 = parseFloat(num2);
+
+      // Check if the provided numbers are valid
+      if (isNaN(number1) || isNaN(number2)) {
+        return res.status(400).send(JSON.stringify({ error: 'Both num1 and num2 must be valid numbers.' }, null, 2));
+      }
+
+      // Perform the math operation (add, subtract, multiply, divide)
+      const result = performMathOperation(operation, number1, number2);
+      res.send(JSON.stringify({ metadata: serviceMetadata, result: result }, null, 2));
+      return;
+    }
+
+    if (operation === 'gcf' && num1 && num2) {
+      const number1 = parseInt(num1, 10);
+      const number2 = parseInt(num2, 10);
+      const gcf = calculateGCF(number1, number2);
+      res.send(JSON.stringify({ metadata: serviceMetadata, result: gcf }, null, 2));
+      return;
+    }
+
+    if (operation === 'lcm' && num1 && num2) {
+      const number1 = parseInt(num1, 10);
+      const number2 = parseInt(num2, 10);
+      const lcm = calculateLCM(number1, number2);
+      res.send(JSON.stringify({ metadata: serviceMetadata, result: lcm }, null, 2));
+      return;
+    }
+
+    return res.status(400).send(JSON.stringify({ error: 'Invalid query parameters provided.' }, null, 2));
   } catch (error) {
-    res.status(500).json({
-      error: 'Failed to retrieve data from WolframAlpha.',
-      details: error.message
-    });
+    return res.status(400).send(JSON.stringify({ error: error.message }, null, 2));
   }
 });
 

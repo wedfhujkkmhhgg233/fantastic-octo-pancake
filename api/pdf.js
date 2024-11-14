@@ -8,7 +8,7 @@ const serviceMetadata = {
   author: 'Jerome',
   description: 'Search on PDF documents based on a search term and page number.',
   category: 'Search',
-  link: '/api/pdfsearch?prompt=cat&page=1'
+  link: ['/api/pdfsearch?prompt=cat&page=1']
 };
 
 const url = "https://www.pdfsearch.io/index.php";  // URL for the scraping service
@@ -81,8 +81,7 @@ router.get('/api/pdfsearch', async (req, res) => {
   try {
     const results = await scrapePdfSearch(prompt, parseInt(page, 10));
 
-    // Pretty-print JSON response
-    res.json(JSON.parse(JSON.stringify({ metadata: serviceMetadata, data: results }, null, 2)));
+    res.json({ metadata: serviceMetadata, data: results });
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve data from PDFSearch.io', details: error.message });
   }

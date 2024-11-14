@@ -51,7 +51,9 @@ router.get('/pdfsearch', async (req, res) => {
     const errorResponse = {
       error: 'Please provide a search query with the "prompt" parameter.'
     };
-    return res.send(JSON.stringify(errorResponse, null, 2)); // Pretty JSON for error
+
+    // Send the error response as pretty-printed JSON
+    return res.send(JSON.stringify(errorResponse, null, 2));
   }
 
   // Set a default count if not provided
@@ -61,26 +63,23 @@ router.get('/pdfsearch', async (req, res) => {
     const results = await googleSearch(prompt, searchCount);
 
     // Prepare the response object with metadata and results
-    const responseData = {
+    const waitJson = {
       metadata: serviceMetadata,
       data: results.length > 0 ? results : 'No PDFs found.'
     };
 
-    // Pretty-Stringify the entire response object (metadata + data)
-    const prettyResponse = JSON.stringify(responseData, null, 2); // Pretty JSON output
-
-    res.send(prettyResponse);  // Send the formatted JSON string as response
+    // Send the entire response as pretty-printed JSON string
+    res.send(JSON.stringify(waitJson, null, 2));
 
   } catch (error) {
-    // If an error occurs, send the error response with pretty JSON formatting
+    // If an error occurs, send the error response as pretty-printed JSON
     const errorResponse = {
       error: 'Failed to retrieve PDF results.',
       details: error.message
     };
 
-    const prettyErrorResponse = JSON.stringify(errorResponse, null, 2); // Pretty JSON for error response
-
-    res.send(prettyErrorResponse); // Send error response in pretty JSON
+    // Send error response in pretty-printed JSON
+    res.send(JSON.stringify(errorResponse, null, 2));
   }
 });
 

@@ -57,18 +57,15 @@ router.get('/pdfsearch', async (req, res) => {
   try {
     const results = await googleSearch(prompt, searchCount);
 
-    if (results.length > 0) {
-      // Respond with pretty-printed JSON
-      res.json({
-        metadata: serviceMetadata,
-        data: JSON.parse(JSON.stringify(results, null, 2)) // Pretty JSON output
-      });
-    } else {
-      res.json({
-        metadata: serviceMetadata,
-        data: 'No PDFs found.'
-      });
-    }
+    // Prepare the response object with metadata and results
+    const responseData = {
+      metadata: serviceMetadata,
+      data: results.length > 0 ? results : 'No PDFs found.'
+    };
+
+    // Send the response with pretty JSON formatting
+    res.json(JSON.parse(JSON.stringify(responseData, null, 2))); // Pretty JSON output
+
   } catch (error) {
     res.status(500).json({
       error: 'Failed to retrieve PDF results.',

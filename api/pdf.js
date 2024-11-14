@@ -3,83 +3,61 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 
 const router = express.Router();
+
 const serviceMetadata = {
   name: 'PDF Search',
   author: 'Jerome',
-  description: 'Search on PDF documents based on a search term and page number.',
+  description: 'Search for PDF documents based on a search term.',
   category: 'Search',
-  link: ['/api/pdfsearch?prompt=cat&page=1']
+  link: ['/api/pdfsearch?prompt=cat']
 };
 
-const url = "https://www.pdfsearch.io/index.php";  // URL for the scraping service
+const url = 'https://www.pdfsearch.io/index.php'; // URL for the scraping service
 
-// Function to scrape PDF search results
-async function scrapePdfSearch(query, pages = 1) {
-    const results = [];
+// Function to perform the PDF search
+async function searchPDFDocuments(query) {
+  const results = [];
+  try {
+    // Send the POST request to initiate the search
+    const searchResponse = await axios.post(url, new URLSearchParams({
+      a: query
+    }), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
+      }
+    });
 
-    try {
-        for (let page = 1; page <= pages; page++) {
-            // Prepare POST request data
-            const formData = new URLSearchParams();
-            formData.append('a', query);
+    const $ = cheerio.load(searchResponse.data);
 
-            // Send the POST request
-            const response = await axios.post(url, formData, {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
-                }
-            });
+    // Extract total result count
+    const resultCount = $('blockquote h4').text().replace('Results: ', '').trim();
 
-            const $ = cheerio.load(response.data);
+    // Parse each document result (adjust selectors if necessary)
+    $('div.result-item').each((i, elem) => {
+      const title = $(elem).find('.document-title').text().trim();
+      const link = $(elem).find('a').attr('href');
+      if (title && link) {
+        results.push({ title, link: `https://www.pdfsearch.io${link}` });
+      }
+    });
 
-            // Extract total results
-            const totalResultsText = $('h4').first().text();
-            const totalResults = totalResultsText.match(/\d+/g) ? totalResultsText.match(/\d+/g)[0] : "N/A";
-
-            console.log(`Total Results for "${query}": ${totalResults}`);
-
-            // Extract pagination links
-            const paginationLinks = [];
-            $('ul.pagination li a').each((index, element) => {
-                const pageLink = $(element).attr('href');
-                if (pageLink) paginationLinks.push(pageLink);
-            });
-
-            console.log('Pagination Links:', paginationLinks);
-
-            // Extract document results
-            $('div.row').each((index, element) => {
-                const resultTitle = $(element).find('h3').text().trim();
-                const resultLink = $(element).find('a').attr('href');
-                if (resultTitle && resultLink) {
-                    results.push({
-                        title: resultTitle,
-                        link: `https://www.pdfsearch.io${resultLink}`
-                    });
-                }
-            });
-
-            console.log(`Page ${page} Results:`, results);
-        }
-
-    } catch (error) {
-        console.error("Error during scraping:", error.message);
-    }
-
-    return results;
+    return { query, resultCount, results };
+  } catch (error) {
+    throw new Error(`Error fetching search results: ${error.message}`);
+  }
 }
 
 // Route for PDF search
 router.get('/pdfsearch', async (req, res) => {
-  const { prompt, page } = req.query;
+  const { prompt } = req.query;
 
-  if (!prompt || !page) {
-    return res.status(400).json({ error: 'Please provide both "prompt" and "page" query parameters.' });
+  if (!prompt) {
+    return res.status(400).json({ error: 'Please provide a "prompt" query parameter.' });
   }
 
   try {
-    const results = await scrapePdfSearch(prompt, parseInt(page, 10));
+    const results = await searchPDFDocuments(prompt);
 
     // Pretty-print JSON response
     res.json(JSON.parse(JSON.stringify({ metadata: serviceMetadata, data: results }, null, 2)));

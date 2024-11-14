@@ -81,7 +81,8 @@ router.get('/api/pdfsearch', async (req, res) => {
   try {
     const results = await scrapePdfSearch(prompt, parseInt(page, 10));
 
-    res.json({ metadata: serviceMetadata, data: results });
+    // Pretty-print JSON response
+    res.json(JSON.parse(JSON.stringify({ metadata: serviceMetadata, data: results }, null, 2)));
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve data from PDFSearch.io', details: error.message });
   }

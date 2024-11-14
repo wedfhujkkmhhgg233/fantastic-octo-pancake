@@ -74,4 +74,4 @@ export const run = async function ({ api, event, args }) {
 };
 
 // Export router and serviceMetadata
-export { router, serviceMetadata };
+export { route };

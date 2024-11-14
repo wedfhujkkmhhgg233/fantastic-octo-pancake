@@ -5,51 +5,39 @@ import * as cheerio from 'cheerio';
 const router = express.Router();
 
 const serviceMetadata = {
-  name: 'PDF Search',
+  name: 'Refseek Search',
   author: 'Jerome',
-  description: 'Search for PDF documents based on a search term.',
+  description: 'Search for documents on Refseek based on a search term.',
   category: 'Search',
-  link: ['/api/pdfsearch?prompt=cat']
+  link: ['/api/refseeksearch?prompt=dog']
 };
 
-const url = 'https://www.pdfsearch.io/index.php'; // URL for the scraping service
+const url = 'https://www.refseek.com/documents';
 
-// Function to perform the PDF search
-async function searchPDFDocuments(query) {
-  const results = [];
+// Function to perform the Refseek search
+async function fetchRefseekResults(query) {
   try {
-    // Send the POST request to initiate the search
-    const searchResponse = await axios.post(url, new URLSearchParams({
-      a: query
-    }), {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
-      }
-    });
+    const response = await axios.get(`${url}?search=${encodeURIComponent(query)}`);
+    const html = response.data;
 
-    const $ = cheerio.load(searchResponse.data);
+    // Parse the HTML response with Cheerio
+    const $ = cheerio.load(html);
 
-    // Extract total result count
-    const resultCount = $('blockquote h4').text().replace('Results: ', '').trim();
+    // Extract search results
+    const results = $('.search__result').map((index, element) => ({
+      title: $(element).find('.result__title').text().trim(),
+      link: $(element).find('a').attr('href'),
+      description: $(element).find('.result__description').text().trim(),
+    })).get();
 
-    // Parse each document result (adjust selectors if necessary)
-    $('div.result-item').each((i, elem) => {
-      const title = $(elem).find('.document-title').text().trim();
-      const link = $(elem).find('a').attr('href');
-      if (title && link) {
-        results.push({ title, link: `https://www.pdfsearch.io${link}` });
-      }
-    });
-
-    return { query, resultCount, results };
+    return results;
   } catch (error) {
-    throw new Error(`Error fetching search results: ${error.message}`);
+    throw new Error(`Error fetching data from Refseek: ${error.message}`);
   }
 }
 
-// Route for PDF search
-router.get('/pdfsearch', async (req, res) => {
+// Route for Refseek search
+router.get('/refseeksearch', async (req, res) => {
   const { prompt } = req.query;
 
   if (!prompt) {
@@ -57,12 +45,12 @@ router.get('/pdfsearch', async (req, res) => {
   }
 
   try {
-    const results = await searchPDFDocuments(prompt);
+    const results = await fetchRefseekResults(prompt);
 
     // Pretty-print JSON response
     res.json(JSON.parse(JSON.stringify({ metadata: serviceMetadata, data: results }, null, 2)));
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve data from PDFSearch.io', details: error.message });
+    res.status(500).json({ error: 'Failed to retrieve data from Refseek', details: error.message });
   }
 });
 

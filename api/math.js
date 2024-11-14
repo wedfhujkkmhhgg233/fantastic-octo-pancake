@@ -8,7 +8,7 @@ const serviceMetadata = {
   name: 'Advanced Math Calculator',
   author: 'Jerome',
   description: 'Performs basic math operations, algebraic simplification, GCF, and LCM calculations.',
-  category: 'Math',
+  category: 'Others',
   link: ['/api/math?operation=add&num1=5&num2=3']  // Example query link for addition
 };
 

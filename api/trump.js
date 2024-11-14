@@ -5,7 +5,8 @@ import canvas from 'canvas';
 
 const router = express.Router();
 
-const serviceMetadata = {
+// Service Metadata
+export const serviceMetadata = {
   name: 'Trump Image Generator',
   author: 'ZiaRein',
   description: 'Generates a Trump-themed image with custom text.',
@@ -13,7 +14,8 @@ const serviceMetadata = {
   link: ['/service/trump?text=<your-text>'],
 };
 
-module.exports.wrapText = (ctx, text, maxWidth) => {
+// Wrap Text Function
+export const wrapText = (ctx, text, maxWidth) => {
   return new Promise(resolve => {
     if (ctx.measureText(text).width < maxWidth) return resolve([text]);
     if (ctx.measureText('W').width > maxWidth) return resolve(null);
@@ -42,7 +44,8 @@ module.exports.wrapText = (ctx, text, maxWidth) => {
   });
 };
 
-module.exports.run = async function ({ api, event, args }) {
+// Run Function
+export const run = async function ({ api, event, args }) {
   let { senderID, threadID, messageID } = event;
   let pathImg = __dirname + '/cache/trump1.png';
   var text = args.join(" ");
@@ -62,7 +65,7 @@ module.exports.run = async function ({ api, event, args }) {
     fontSize--;
     ctx.font = `400 ${fontSize}px Arial, sans-serif`;
   }
-  const lines = await this.wrapText(ctx, text, 650);
+  const lines = await wrapText(ctx, text, 650);
   ctx.fillText(lines.join('\n'), 60, 165);
   ctx.beginPath();
   const imageBuffer = canvasObj.toBuffer();
@@ -70,4 +73,5 @@ module.exports.run = async function ({ api, event, args }) {
   return api.sendMessage({ attachment: fs.createReadStream(pathImg) }, threadID, () => fs.unlinkSync(pathImg), messageID);
 };
 
+// Export router and serviceMetadata
 export { router, serviceMetadata };

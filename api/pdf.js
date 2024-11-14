@@ -1,74 +1,73 @@
 import express from 'express';
-import puppeteer from 'puppeteer';
+import google from 'googleapis';
 
 const router = express.Router();
+const CSE_ID = 'd5183818b834444bd';
+const API_KEY = 'AIzaSyDL9QfgjBAHn835ncpmfnp6uOP3SuuTJMQ';
 
 const serviceMetadata = {
-  name: 'Refseek PDF Search',
+  name: 'PDF Search',
   author: 'Jerome',
-  description: 'Search for PDF documents on Refseek based on a search term.',
+  description: 'Search for PDF documents.',
   category: 'Search',
-  link: ['/api/refseekpdfsearch?prompt=dog']
+  link: ['/api/pdfsearch?prompt=dog']
 };
 
-// Function to scrape PDF links and titles using Puppeteer
-async function scrapePDFLinksAndTitles(searchQuery) {
+// Custom search function to fetch PDFs and their descriptions
+async function googleSearch(query) {
+  const customsearch = google.google.customsearch('v1');
   try {
-    // Initialize Puppeteer and launch the browser
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-
-    // Replace spaces with '+' for URL encoding
-    const query = searchQuery.replace(/\s+/g, '+');
-    const url = `https://www.refseek.com/documents?search=${query}`;
-
-    // Navigate to the page and wait for the content to load
-    await page.goto(url, { waitUntil: 'networkidle0' });
-
-    // Extract the required information (PDF links, titles, and descriptions)
-    const pdfDocuments = await page.evaluate(() => {
-      const results = [];
-      // Scrape each search result element
-      const items = document.querySelectorAll('.search__result');
-      items.forEach(item => {
-        const linkElement = item.querySelector('a');
-        const link = linkElement ? linkElement.href : '';
-        const title = item.querySelector('.result__title') ? item.querySelector('.result__title').innerText : 'No title available';
-        const description = item.querySelector('.result__description') ? item.querySelector('.result__description').innerText : 'No description available';
-
-        // Only include PDF links
-        if (link && link.endsWith('.pdf')) {
-          results.push({ title, description, link });
-        }
-      });
-      return results;
+    // Perform search with the query
+    const res = await customsearch.cse.list({
+      cx: CSE_ID,
+      q: query,
+      auth: API_KEY,
+      fileType: 'pdf', // Ensure we are searching for PDFs
+      num: 10, // Number of results to fetch
     });
 
-    // Close the browser
-    await browser.close();
+    // Filter and map the PDF links with their descriptions
+    const pdfResults = res.data.items
+      .filter(item => item.link.endsWith('.pdf'))
+      .map(item => ({
+        title: item.title,
+        link: item.link,
+        description: item.snippet || 'No description available'
+      }));
 
-    // Return the results
-    return pdfDocuments;
+    return pdfResults;
   } catch (error) {
-    throw new Error(`Error fetching PDF links and titles: ${error.message}`);
+    console.error('Error occurred during Google search:', error);
+    return [];
   }
 }
 
-// Route for Refseek PDF search
-router.get('/refseekpdfsearch', async (req, res) => {
+// Route to handle PDF search via Google Custom Search
+router.get('/pdfsearch', async (req, res) => {
   const { prompt } = req.query;
-
   if (!prompt) {
-    return res.status(400).json({ error: 'Please provide a "prompt" query parameter.' });
+    return res.status(400).json({ error: 'Please provide a search query with the "prompt" parameter.' });
   }
 
   try {
-    const results = await scrapePDFLinksAndTitles(prompt);
+    const results = await googleSearch(prompt);
 
-    // Pretty-print JSON response
-    res.json(JSON.parse(JSON.stringify({ metadata: serviceMetadata, data: results }, null, 2)));
+    if (results.length > 0) {
+      res.json({
+        metadata: serviceMetadata,
+        data: results
+      });
+    } else {
+      res.json({
+        metadata: serviceMetadata,
+        data: 'No PDFs found.'
+      });
+    }
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve PDF data from Refseek', details: error.message });
+    res.status(500).json({
+      error: 'Failed to retrieve PDF results.',
+      details: error.message
+    });
   }
 });
 

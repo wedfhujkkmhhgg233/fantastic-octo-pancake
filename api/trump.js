@@ -45,14 +45,16 @@ export const wrapText = (ctx, text, maxWidth) => {
 };
 
 // Run Function
-export const run = async function ({ api, event, args }) {
-  let { senderID, threadID, messageID } = event;
+export const run = async function (req, res) {
   let pathImg = __dirname + '/cache/trump1.png';
-  var text = args.join(" ");
-  if (!text) return api.sendMessage(`Please enter some content\n\nHow to use?\n${global.config.PREFIX}trump <content>\n\nExample:\n${global.config.PREFIX}trump trust yourself\n\nCreated by: ZiaRein`, threadID, messageID);
+  const { text } = req.query;
 
-  let getPorn = (await axios.get(`https://i.ibb.co/7Y5jLWq/ZtWfHHx.png`, { responseType: 'arraybuffer' })).data;
-  fs.writeFileSync(pathImg, Buffer.from(getPorn, 'utf-8'));
+  if (!text) {
+    return res.status(400).send('Please provide text in the query parameter');
+  }
+
+  let imageData = (await axios.get(`https://i.ibb.co/7Y5jLWq/ZtWfHHx.png`, { responseType: 'arraybuffer' })).data;
+  fs.writeFileSync(pathImg, Buffer.from(imageData, 'utf-8'));
   let baseImage = await canvas.loadImage(pathImg);
   let canvasObj = canvas.createCanvas(baseImage.width, baseImage.height);
   let ctx = canvasObj.getContext("2d");
@@ -70,8 +72,16 @@ export const run = async function ({ api, event, args }) {
   ctx.beginPath();
   const imageBuffer = canvasObj.toBuffer();
   fs.writeFileSync(pathImg, imageBuffer);
-  return api.sendMessage({ attachment: fs.createReadStream(pathImg) }, threadID, () => fs.unlinkSync(pathImg), messageID);
+
+  res.setHeader('Content-Type', 'image/png');
+  res.send(imageBuffer);
+
+  // Clean up by deleting the image file
+  fs.unlinkSync(pathImg);
 };
+
+// Define the route
+router.get('/trump', run);
 
 // Export router and serviceMetadata
 export { router };

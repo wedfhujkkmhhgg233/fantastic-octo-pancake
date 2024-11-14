@@ -11,7 +11,7 @@ export const serviceMetadata = {
   author: 'ZiaRein',
   description: 'Generates a Trump-themed image with custom text.',
   category: 'Canvas',
-  link: ['/service/trump?text=<your-text>'],
+  link: ['/api/trump?text=<your-text>'],
 };
 
 // Wrap Text Function

@@ -10,11 +10,11 @@ const serviceMetadata = {
   author: 'Jerome',
   description: 'Search for PDF documents.',
   category: 'Search',
-  link: ['/api/pdfsearch?prompt=dog']
+  link: ['/api/pdfsearch?prompt=dog&count=']
 };
 
 // Custom search function to fetch PDFs and their descriptions
-async function googleSearch(query) {
+async function googleSearch(query, count = 10) {
   const customsearch = google.google.customsearch('v1');
   try {
     // Perform search with the query
@@ -23,7 +23,7 @@ async function googleSearch(query) {
       q: query,
       auth: API_KEY,
       fileType: 'pdf', // Ensure we are searching for PDFs
-      num: 10, // Number of results to fetch
+      num: count, // Number of results to fetch, dynamically set
     });
 
     // Filter and map the PDF links with their descriptions
@@ -44,18 +44,24 @@ async function googleSearch(query) {
 
 // Route to handle PDF search via Google Custom Search
 router.get('/pdfsearch', async (req, res) => {
-  const { prompt } = req.query;
+  const { prompt, count } = req.query;
+  
+  // Validate if prompt is provided
   if (!prompt) {
     return res.status(400).json({ error: 'Please provide a search query with the "prompt" parameter.' });
   }
 
+  // Set a default count if not provided
+  const searchCount = count ? parseInt(count, 10) : 10;
+
   try {
-    const results = await googleSearch(prompt);
+    const results = await googleSearch(prompt, searchCount);
 
     if (results.length > 0) {
+      // Respond with pretty-printed JSON
       res.json({
         metadata: serviceMetadata,
-        data: results
+        data: JSON.parse(JSON.stringify(results, null, 2)) // Pretty JSON output
       });
     } else {
       res.json({

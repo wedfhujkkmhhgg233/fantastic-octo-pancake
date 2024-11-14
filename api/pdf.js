@@ -10,7 +10,7 @@ const serviceMetadata = {
   author: 'Jerome',
   description: 'Search for PDF documents.',
   category: 'Search',
-  link: ['/api/pdfsearch?prompt=dog&count=']
+  link: ['/api/pdfsearch?prompt=dog']
 };
 
 // Custom search function to fetch PDFs and their descriptions
@@ -45,10 +45,13 @@ async function googleSearch(query, count = 10) {
 // Route to handle PDF search via Google Custom Search
 router.get('/pdfsearch', async (req, res) => {
   const { prompt, count } = req.query;
-  
+
   // Validate if prompt is provided
   if (!prompt) {
-    return res.status(400).json({ error: 'Please provide a search query with the "prompt" parameter.' });
+    const errorResponse = {
+      error: 'Please provide a search query with the "prompt" parameter.'
+    };
+    return res.send(JSON.stringify(errorResponse, null, 2)); // Pretty JSON for error
   }
 
   // Set a default count if not provided
@@ -63,14 +66,21 @@ router.get('/pdfsearch', async (req, res) => {
       data: results.length > 0 ? results : 'No PDFs found.'
     };
 
-    // Send the response with pretty JSON formatting
-    res.json(JSON.parse(JSON.stringify(responseData, null, 2))); // Pretty JSON output
+    // Pretty-Stringify the entire response object (metadata + data)
+    const prettyResponse = JSON.stringify(responseData, null, 2); // Pretty JSON output
+
+    res.send(prettyResponse);  // Send the formatted JSON string as response
 
   } catch (error) {
-    res.status(500).json({
+    // If an error occurs, send the error response with pretty JSON formatting
+    const errorResponse = {
       error: 'Failed to retrieve PDF results.',
       details: error.message
-    });
+    };
+
+    const prettyErrorResponse = JSON.stringify(errorResponse, null, 2); // Pretty JSON for error response
+
+    res.send(prettyErrorResponse); // Send error response in pretty JSON
   }
 });
 

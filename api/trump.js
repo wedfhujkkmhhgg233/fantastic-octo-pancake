@@ -14,7 +14,7 @@ export const serviceMetadata = {
   version: "1.0.1",
   author: "ZiaRein",
   description: "Generates a Trump-themed image with custom text",
-  category: "edit-img",
+  category: "Canvas",
   link: ["/api/trump1?text=<your-text>"],
 };
 

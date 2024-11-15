@@ -8,7 +8,7 @@ export const serviceMetadata = {
   name: 'Email Sender',
   author: 'Jerome Jamis',
   description: 'Sends an email with the provided email address and text.',
-  category: 'Email',
+  category: 'Others',
   link: ['/email-sender?email=&text='],
 };
 

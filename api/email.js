@@ -9,7 +9,7 @@ export const serviceMetadata = {
   author: 'Jerome Jamis',
   description: 'Sends an email with the provided email address and text.',
   category: 'Others',
-  link: ['/email-sender?email=&text='],
+  link: ['/api/email-sender?email=&text='],
 };
 
 // Email sender function

@@ -5,10 +5,10 @@ const router = express.Router();
 
 // Service Metadata
 export const serviceMetadata = {
-  name: 'News Search',
+  name: 'News Fetcher',
   author: 'Jerome Jamis',
-  description: 'Fetches up to 10 news articles based on a query.',
-  category: 'Search',
+  description: 'Fetches news articles based on a query.',
+  category: 'News',
   link: ['/api/news?query=&count='],
 };
 
@@ -32,30 +32,8 @@ router.get('/news', async (req, res) => {
   try {
     const response = await axios.get(url);
 
-    // Extract articles
-    const limitedArticles = response.data.articles.slice(0, Number(count));
-
-    res.setHeader('Content-Type', 'application/json');
-    res.status(200).send(
-      JSON.stringify(
-        {
-          status: response.data.status,
-          totalResults: response.data.totalResults,
-          articles: limitedArticles.map(article => ({
-            source: article.source,
-            author: article.author,
-            title: article.title,
-            description: article.description,
-            url: article.url,
-            urlToImage: article.urlToImage,
-            publishedAt: article.publishedAt,
-            content: article.content,
-          })),
-        },
-        null,
-        2 // Pretty JSON
-      )
-    );
+    // Convert the API response to a pretty-printed JSON string
+    res.status(200).send(JSON.stringify(response.data, null, 2));
   } catch (error) {
     console.error('Error fetching news:', error.message);
     res.status(500).json({

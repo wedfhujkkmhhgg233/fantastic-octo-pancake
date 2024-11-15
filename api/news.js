@@ -9,7 +9,7 @@ export const serviceMetadata = {
   author: 'Jerome Jamis',
   description: 'Fetches news articles from the News.',
   category: 'Search',
-  link: ['/api/news?query=&count='],
+  link: ['/api/news?query=&count=1'],
 };
 
 // Route to fetch news

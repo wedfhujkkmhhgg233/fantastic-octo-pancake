@@ -9,7 +9,7 @@ export const serviceMetadata = {
   author: 'Jerome Jamis',
   description: 'Fetches news articles based on query and count.',
   category: 'Search',
-  link: ['/news?query=Philippines&count='],
+  link: ['/api/news?query=Philippines&count='],
 };
 
 // Your NewsAPI key

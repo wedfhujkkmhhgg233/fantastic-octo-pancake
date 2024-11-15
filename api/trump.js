@@ -6,18 +6,17 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const router = express.Router();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Service Metadata
 export const serviceMetadata = {
-  name: 'Trump Image Generator',
-  author: 'ZiaRein',
-  description: 'Generates a Trump-themed image with custom text.',
-  category: 'Canvas',
-  link: ['/api/trump?text=<your-text>'],
+  name: "Trump1 Image Generator",
+  version: "1.0.1",
+  author: "ZiaRein",
+  description: "Generates a Trump-themed image with custom text",
+  category: "edit-img",
+  link: ["/api/trump1?text=<your-text>"],
 };
-
-// Define __dirname equivalent
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Wrap Text Function
 export const wrapText = (ctx, text, maxWidth) => {
@@ -50,46 +49,45 @@ export const wrapText = (ctx, text, maxWidth) => {
 };
 
 // Run Function to Generate Image
-export const run = async (text) => {
+export const generateTrumpImage = async (text) => {
   const pathImg = path.resolve(__dirname, 'cache', 'trump1.png');
 
-  // Get image background
-  const getImageData = (await axios.get(`https://i.ibb.co/7Y5jLWq/ZtWfHHx.png`, { responseType: 'arraybuffer' })).data;
-  fs.writeFileSync(pathImg, Buffer.from(getImageData, 'utf-8'));
+  // Fetch background image
+  const imageResponse = await axios.get(`https://i.ibb.co/7Y5jLWq/ZtWfHHx.png`, { responseType: 'arraybuffer' });
+  fs.writeFileSync(pathImg, Buffer.from(imageResponse.data, 'utf-8'));
 
-  // Create canvas and draw text
+  // Set up canvas and draw text
   const baseImage = await canvas.loadImage(pathImg);
   const canvasObj = canvas.createCanvas(baseImage.width, baseImage.height);
   const ctx = canvasObj.getContext("2d");
-  
   ctx.drawImage(baseImage, 0, 0, canvasObj.width, canvasObj.height);
   ctx.font = "400 45px Arial";
   ctx.fillStyle = "#000000";
   ctx.textAlign = "start";
+
   let fontSize = 250;
   while (ctx.measureText(text).width > 1300) {
     fontSize--;
     ctx.font = `400 ${fontSize}px Arial, sans-serif`;
   }
-  
+
   const lines = await wrapText(ctx, text, 650);
   ctx.fillText(lines.join('\n'), 60, 165);
   ctx.beginPath();
 
-  // Save the image to a buffer
+  // Save and return image buffer
   const imageBuffer = canvasObj.toBuffer();
   fs.writeFileSync(pathImg, imageBuffer);
-  
-  return pathImg;  // Return the path to the generated image
+  return pathImg;
 };
 
-// GET route for the Trump Image Generator
-router.get('/trump', async (req, res) => {
-  const text = req.query.text || "Default text"; // Get text from query
+// GET route for Trump Image Generator
+router.get('/trump1', async (req, res) => {
+  const text = req.query.text || "Default text";
   try {
-    const imagePath = await run(text);
+    const imagePath = await generateTrumpImage(text);
     res.setHeader('Content-Type', 'image/png');
-    res.sendFile(imagePath, () => fs.unlinkSync(imagePath)); // Clean up file after sending
+    res.sendFile(imagePath, () => fs.unlinkSync(imagePath)); // Clean up after sending
   } catch (error) {
     res.status(500).send("Failed to generate image.");
   }

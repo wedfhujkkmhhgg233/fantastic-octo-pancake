@@ -79,7 +79,7 @@ export const generateTrumpImage = async (text) => {
     ctx.font = `400 ${fontSize}px Arial, sans-serif`;
   }
 
-  const lines = await wrapText(ctx, text, 650);
+  const lines = await wrapText(ctx, text, 1160);
   ctx.fillText(lines.join('\n'), 60, 165);
   ctx.beginPath();
 

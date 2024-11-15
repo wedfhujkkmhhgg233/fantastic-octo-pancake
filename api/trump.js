@@ -48,13 +48,21 @@ export const wrapText = (ctx, text, maxWidth) => {
   });
 };
 
-// Run Function to Generate Image
+// Download Background Image
+async function downloadImage(url, filepath) {
+  const response = await axios.get(url, { responseType: 'arraybuffer' });
+  await fs.outputFile(filepath, response.data);
+}
+
+// Generate Trump Image
 export const generateTrumpImage = async (text) => {
   const pathImg = path.resolve(__dirname, 'cache', 'trump1.png');
+  const imageUrl = 'https://i.ibb.co/7Y5jLWq/ZtWfHHx.png';
 
-  // Fetch background image
-  const imageResponse = await axios.get(`https://i.ibb.co/7Y5jLWq/ZtWfHHx.png`, { responseType: 'arraybuffer' });
-  fs.writeFileSync(pathImg, Buffer.from(imageResponse.data, 'utf-8'));
+  // Download background image if it doesn't exist
+  if (!fs.existsSync(pathImg)) {
+    await downloadImage(imageUrl, pathImg);
+  }
 
   // Set up canvas and draw text
   const baseImage = await canvas.loadImage(pathImg);
@@ -76,9 +84,10 @@ export const generateTrumpImage = async (text) => {
   ctx.beginPath();
 
   // Save and return image buffer
+  const outputImagePath = path.resolve(__dirname, 'cache', 'output_trump1.png');
   const imageBuffer = canvasObj.toBuffer();
-  fs.writeFileSync(pathImg, imageBuffer);
-  return pathImg;
+  fs.writeFileSync(outputImagePath, imageBuffer);
+  return outputImagePath;
 };
 
 // GET route for Trump Image Generator
@@ -87,8 +96,14 @@ router.get('/trump1', async (req, res) => {
   try {
     const imagePath = await generateTrumpImage(text);
     res.setHeader('Content-Type', 'image/png');
-    res.sendFile(imagePath, () => fs.unlinkSync(imagePath)); // Clean up after sending
+    res.sendFile(imagePath, (err) => {
+      if (err) {
+        console.error("Error sending file:", err);
+      }
+      fs.unlinkSync(imagePath); // Clean up after sending
+    });
   } catch (error) {
+    console.error("Failed to generate image:", error);
     res.status(500).send("Failed to generate image.");
   }
 });

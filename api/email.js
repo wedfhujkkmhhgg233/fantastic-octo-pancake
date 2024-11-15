@@ -1,54 +1,45 @@
 import express from 'express';
-import nodemailer from 'nodemailer';
+import axios from 'axios';
 
 const router = express.Router();
 
 // Service Metadata
 export const serviceMetadata = {
-  name: 'Email Sender',
+  name: 'Trivia API',
   author: 'Jerome Jamis',
-  description: 'Sends an email with the provided email address and text.',
+  description: 'Fetches a random trivia question from the Open Trivia Database.',
   category: 'Others',
-  link: ['/api/email-sender?email=&text='],
+  link: ['/api/trivia'],
 };
 
-// Email sender function
-export const sendEmail = async ({ email, text }) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'webjerome91', // Your email address
-      pass: 'jeromeweb74727', // Your password
-    },
-  });
-
-  const mailOptions = {
-    from: 'webjerome91@gmail.com', // Sender's email address
-    to: email, // Recipient's email address
-    subject: 'Hello from Jerome Web',
-    text: text,
-  };
-
+// Fetch Trivia Question
+export const fetchTrivia = async () => {
   try {
-    const info = await transporter.sendMail(mailOptions);
-    return `Email sent: ${info.response}`;
+    const response = await axios.get('https://opentdb.com/api.php?amount=1');
+    const questionData = response.data.results[0];
+    return {
+      question: questionData.question,
+      correct_answer: questionData.correct_answer,
+      incorrect_answers: questionData.incorrect_answers,
+    };
   } catch (error) {
-    throw new Error(`Error occurred: ${error.message}`);
+    throw new Error('Error fetching trivia question: ' + error.message);
   }
 };
 
-// Router to handle the email sending request via GET
-router.get('/email-sender', async (req, res) => {
-  const { email, text } = req.query;
-  if (!email || !text) {
-    return res.status(400).json({ error: 'Email and text are required.' });
-  }
-
+// Router to handle Trivia request
+router.get('/trivia', async (req, res) => {
   try {
-    const result = await sendEmail({ email, text });
-    res.json({ message: result });
+    const trivia = await fetchTrivia();
+    const triviaResponse = {
+      question: trivia.question,
+      answers: [...trivia.incorrect_answers, trivia.correct_answer],
+      correct_answer: trivia.correct_answer,
+    };
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(triviaResponse, null, 2)); // Pretty print with 2 spaces indentation
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).send(JSON.stringify({ error: error.message }, null, 2));
   }
 });
 

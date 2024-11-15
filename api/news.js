@@ -5,11 +5,11 @@ const router = express.Router();
 
 // Service Metadata
 export const serviceMetadata = {
-  name: 'News API',
+  name: 'News SEARCH',
   author: 'Jerome Jamis',
   description: 'Fetches news articles based on query and count.',
-  category: 'News',
-  link: ['/news?query=Weather Philippines&count='],
+  category: 'Search',
+  link: ['/news?query=Philippines&count='],
 };
 
 // Your NewsAPI key

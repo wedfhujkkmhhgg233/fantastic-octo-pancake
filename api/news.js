@@ -7,7 +7,7 @@ const router = express.Router();
 export const serviceMetadata = {
   name: 'News Finder',
   author: 'Jerome Jamis',
-  description: 'Fetches news articles from the Perigon News API.',
+  description: 'Fetches news articles from the News API.',
   category: 'Search',
   link: ['/api/news?query=&count='],
 };

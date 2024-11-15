@@ -2,6 +2,8 @@ import express from 'express';
 import axios from 'axios';
 import fs from 'fs-extra';
 import canvas from 'canvas';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const router = express.Router();
 
@@ -13,6 +15,9 @@ export const serviceMetadata = {
   category: 'Canvas',
   link: ['/api/trump?text=<your-text>'],
 };
+
+// Define __dirname equivalent
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Wrap Text Function
 export const wrapText = (ctx, text, maxWidth) => {
@@ -44,20 +49,19 @@ export const wrapText = (ctx, text, maxWidth) => {
   });
 };
 
-// Run Function
-export const run = async function (req, res) {
-  let pathImg = __dirname + '/cache/trump1.png';
-  const { text } = req.query;
+// Run Function to Generate Image
+export const run = async (text) => {
+  const pathImg = path.resolve(__dirname, 'cache', 'trump1.png');
 
-  if (!text) {
-    return res.status(400).send('Please provide text in the query parameter');
-  }
+  // Get image background
+  const getImageData = (await axios.get(`https://i.ibb.co/7Y5jLWq/ZtWfHHx.png`, { responseType: 'arraybuffer' })).data;
+  fs.writeFileSync(pathImg, Buffer.from(getImageData, 'utf-8'));
 
-  let imageData = (await axios.get(`https://i.ibb.co/7Y5jLWq/ZtWfHHx.png`, { responseType: 'arraybuffer' })).data;
-  fs.writeFileSync(pathImg, Buffer.from(imageData, 'utf-8'));
-  let baseImage = await canvas.loadImage(pathImg);
-  let canvasObj = canvas.createCanvas(baseImage.width, baseImage.height);
-  let ctx = canvasObj.getContext("2d");
+  // Create canvas and draw text
+  const baseImage = await canvas.loadImage(pathImg);
+  const canvasObj = canvas.createCanvas(baseImage.width, baseImage.height);
+  const ctx = canvasObj.getContext("2d");
+  
   ctx.drawImage(baseImage, 0, 0, canvasObj.width, canvasObj.height);
   ctx.font = "400 45px Arial";
   ctx.fillStyle = "#000000";
@@ -67,21 +71,29 @@ export const run = async function (req, res) {
     fontSize--;
     ctx.font = `400 ${fontSize}px Arial, sans-serif`;
   }
+  
   const lines = await wrapText(ctx, text, 650);
   ctx.fillText(lines.join('\n'), 60, 165);
   ctx.beginPath();
+
+  // Save the image to a buffer
   const imageBuffer = canvasObj.toBuffer();
   fs.writeFileSync(pathImg, imageBuffer);
-
-  res.setHeader('Content-Type', 'image/png');
-  res.send(imageBuffer);
-
-  // Clean up by deleting the image file
-  fs.unlinkSync(pathImg);
+  
+  return pathImg;  // Return the path to the generated image
 };
 
-// Define the route
-router.get('/trump', run);
+// GET route for the Trump Image Generator
+router.get('/trump', async (req, res) => {
+  const text = req.query.text || "Default text"; // Get text from query
+  try {
+    const imagePath = await run(text);
+    res.setHeader('Content-Type', 'image/png');
+    res.sendFile(imagePath, () => fs.unlinkSync(imagePath)); // Clean up file after sending
+  } catch (error) {
+    res.status(500).send("Failed to generate image.");
+  }
+});
 
 // Export router and serviceMetadata
 export { router };

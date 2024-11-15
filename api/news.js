@@ -1,46 +1,76 @@
 import express from 'express';
-import axios from 'axios';
+import Parser from 'rss-parser'; // If you're using ES Modules
+// const Parser = require('rss-parser'); // For CommonJS
 
 const router = express.Router();
+const parser = new Parser();
 
 // Service Metadata
-export const serviceMetadata = {
-  name: 'Genderize API',
+const serviceMetadata = {
+  name: 'News Finder',
   author: 'Jerome Jamis',
-  description: 'Predicts gender based on a name.',
-  category: 'Others',
-  link: ['/api/genderize?name=<name>'],
+  description: 'Fetches Google News articles based on a query.',
+  category: 'Search',
+  link: ['/api/news?query=&count='],
 };
 
-// Route to fetch gender
-router.get('/genderize', async (req, res) => {
-  const { name } = req.query;
+// Fetch Google News RSS with count
+async function getGoogleNews(query, count = 10) {
+    const url = `https://news.google.com/rss/search?q=${query}&hl=en-US&gl=US&ceid=US:en`;
+    
+    try {
+        // Fetch and parse the RSS feed
+        const feed = await parser.parseURL(url);
+        
+        // Map the feed items to a more structured format (as JSON)
+        // Limit the number of articles based on the 'count' parameter
+        const articles = feed.items.slice(0, count).map(item => ({
+            title: item.title,
+            link: item.link,
+            pubDate: item.pubDate,
+            description: item.contentSnippet,
+            source: item.source,
+        }));
 
-  if (!name) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Missing name parameter. Please provide a name.',
-      guide: {
-        usage: '/genderize?name=<name>',
-        example: '/genderize?name=peter',
-      },
-    });
-  }
+        return articles; // Return the structured data for other processing
+    } catch (err) {
+        console.error('Error fetching Google News RSS feed:', err);
 
-  const url = `https://api.genderize.io/?name=${name}`;
+        return {
+            status: 'error',
+            message: 'Failed to fetch Google News RSS feed',
+            error: err.message,
+        };
+    }
+}
 
-  try {
-    const response = await axios.get(url);
+// Express route to get Google News based on query and count
+router.get('/news', async (req, res) => {
+    const { query, count = 10 } = req.query; // Default count to 10 if not provided
 
-    // Pretty JSON response
-    res.status(200).send(JSON.stringify(response.data, null, 2));
-  } catch (error) {
-    console.error('Error fetching gender data:', error.message);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to fetch gender data',
-    });
-  }
+    if (!query) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'Missing query parameter. Provide a topic or keyword to search for news.',
+            guide: {
+                usage: '/news?query=<search-term>&count=<number>',
+                example: '/news?query=technology&count=5',
+            },
+        });
+    }
+
+    try {
+        const articles = await getGoogleNews(query, count);
+        // Send the articles as a pretty JSON response
+        res.status(200).json(articles);
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: 'Failed to fetch Google News articles',
+            error: error.message,
+        });
+    }
 });
 
-export { router };
+// Export router and service metadata in one object
+export { router, serviceMetadata };

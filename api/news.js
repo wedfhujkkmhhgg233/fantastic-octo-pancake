@@ -1,23 +1,21 @@
 import express from 'express';
-import Parser from 'rss-parser';
+import axios from 'axios';
 
 const router = express.Router();
-const parser = new Parser();
 
 // Service Metadata
 export const serviceMetadata = {
-  name: 'Google News Fetcher',
+  name: 'News Finder',
   author: 'Jerome Jamis',
-  description: 'Fetches Google News articles based on a query.',
+  description: 'Fetches news articles from the Perigon News API.',
   category: 'Search',
-  link: ['/news?query=Cat&count='],
+  link: ['/api/news?query=&count='],
 };
 
-// Route to fetch Google News
+// Route to fetch news
 router.get('/news', async (req, res) => {
   const { query, count = 10 } = req.query; // Default count to 10
 
-  // Validate the query parameter
   if (!query) {
     return res.status(400).json({
       status: 'error',
@@ -29,33 +27,49 @@ router.get('/news', async (req, res) => {
     });
   }
 
+  const url = `https://api.goperigon.com/v1/all?apiKey=c97dcc8c-740c-46d2-b7fa-c68ed50d209c&q=${query}`;
+
   try {
-    // Build the RSS feed URL
-    const url = `https://news.google.com/rss/search?q=${query}&hl=en-US&gl=US&ceid=US:en`;
+    const response = await axios.get(url);
 
-    // Parse the RSS feed
-    const feed = await parser.parseURL(url);
-
-    // Limit the results to the requested count
-    const articles = feed.items.slice(0, parseInt(count)).map((item) => ({
-      title: item.title,
-      link: item.link,
-      pubDate: item.pubDate,
-      description: item.contentSnippet,
-      source: item.source || 'Google News',
+    // Get articles and limit to the specified count
+    const articles = response.data.articles.slice(0, count).map(article => ({
+      title: article.title,
+      description: article.description,
+      url: article.url,
+      source: article.source?.name || 'Unknown',
+      publishedAt: article.published_at,
+      content: article.content,
     }));
 
-    // Send the articles as a JSON response
-    res.status(200).json(articles);
+    // Send the formatted response with pretty JSON
+    res.status(200).send(
+      JSON.stringify(
+        {
+          status: 'success',
+          totalResults: response.data.articles.length,
+          count: articles.length,
+          articles,
+        },
+        null,
+        2 // Pretty JSON formatting
+      )
+    );
   } catch (error) {
-    console.error('Error fetching Google News RSS feed:', error.message);
-
-    // Send a detailed error response
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to fetch Google News RSS feed',
-      error: error.message,
-    });
+    console.error('Error fetching news:', error.message);
+    const errorResponse = error.response ? error.response.data : {};
+    res.status(500).send(
+      JSON.stringify(
+        {
+          status: 'error',
+          message: 'Failed to fetch news articles',
+          error: error.message,
+          response: errorResponse,
+        },
+        null,
+        2 // Pretty JSON formatting
+      )
+    );
   }
 });
 

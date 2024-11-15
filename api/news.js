@@ -8,7 +8,7 @@ export const serviceMetadata = {
   name: 'News Search',
   author: 'Jerome Jamis',
   description: 'Fetches news articles based on a query.',
-  category: 'Searxh',
+  category: 'Search',
   link: ['/api/news?query=&count='],
 };
 

@@ -1,4 +1,5 @@
 import express from 'express';
+import axios from 'axios';
 
 const router = express.Router();
 
@@ -12,55 +13,27 @@ const serviceMetadata = {
 };
 
 // Emoji Mix Route
-router.get('/emoji-mix', (req, res) => {
+router.get('/emoji-mix', async (req, res) => {
     // Get query parameters
-    const emoji1 = req.query.emoji1 || '🥺'; // Default emoji1
-    const emoji2 = req.query.emoji2 || '😮'; // Default emoji2
-
-    // Encode the emojis to match the required format
-    const encodedEmoji1 = `u${emoji1.codePointAt(0).toString(16)}`; // Encode emoji1
-    const encodedEmoji2 = `u${emoji2.codePointAt(0).toString(16)}`; // Encode emoji2
+    const emoji1 = req.query.emoji1 || '🥹'; // Default emoji1
+    const emoji2 = req.query.emoji2 || '😗'; // Default emoji2
+    const size = req.query.size || 530; // Default size
 
     // Construct the emoji mix URL
-    const emojiMixUrl = `https://www.gstatic.com/android/keyboard/emojikitchen/20230301/${encodedEmoji1}/${encodedEmoji1}_${encodedEmoji2}.png`;
+    const emojiMixUrl = `https://emojik.vercel.app/s/${encodeURIComponent(emoji1)}_${encodeURIComponent(emoji2)}?size=${size}`;
 
-    // Prepare the JSON response
-    const response = {
-        status: 200,
-        message: "Emoji Mix Generated Successfully",
-        endpoint: `/emoji-mix?emoji1=${encodeURIComponent(emoji1)}&emoji2=${encodeURIComponent(emoji2)}`,
-        locale: "en",
-        results: [
-            {
-                id: "8584330421895299042",
-                title: "",
-                media_formats: {
-                    png_transparent: {
-                        url: emojiMixUrl,
-                        duration: 0,
-                        preview: "",
-                        dims: [534, 534],
-                        size: 17294,
-                    },
-                },
-                created: Math.floor(Date.now() / 1000),
-                content_description: "Sticker",
-                h1_title: "Sticker",
-                itemurl: "",
-                url: emojiMixUrl,
-                tags: [emoji1, emoji2],
-                flags: ["sticker", "static"],
-                hasaudio: false,
-                result_token: "",
-                content_description_source: "CONTENT_DESCRIPTION_SOURCE_UNSPECIFIED",
-            },
-        ],
-        next: "",
-    };
+    try {
+        // Fetch the image data from the generated URL
+        const response = await axios.get(emojiMixUrl, { responseType: 'arraybuffer' });
 
-    // Send the prettified JSON response
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(response, null, 2)); // Pretty JSON format
+        // Set the response content type to image/png
+        res.set('Content-Type', 'image/png');
+        // Send the image data directly
+        res.send(response.data);
+    } catch (error) {
+        // Handle errors if fetching the image fails
+        res.status(500).json({ message: "Error fetching the emoji mix image." });
+    }
 });
 
 export { router, serviceMetadata };

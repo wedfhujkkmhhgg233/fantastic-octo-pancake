@@ -7,8 +7,8 @@ const serviceMetadata = {
     name: "Emoji Mix",
     author: "Jerome",
     description: "Combine two emojis into a custom Emoji Kitchen sticker.",
-    category: "Fun",
-    link: "/api/emoji-mix?emoji1=&emoji2=", // Relative link to the endpoint
+    category: "Others",
+    link: ["/api/emoji-mix?emoji1=&emoji2="] // Relative link to the endpoint
 };
 
 // Emoji Mix Route

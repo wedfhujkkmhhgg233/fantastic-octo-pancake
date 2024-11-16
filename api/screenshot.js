@@ -1,55 +1,55 @@
 import express from 'express';
-import puppeteer from 'puppeteer';
-import fs from 'fs';
-import path from 'path';
+import captureWebsite from 'capture-website';
 
 const router = express.Router();
 
 // Service Metadata
 const serviceMetadata = {
-  name: 'Screenshot Web',
-  author: 'Jerome',
-  description: 'Capture a screenshot of a URL.',
-  category: 'Others',
-  link: ["/api/screenshot?url="]
+    name: "Website Screenshot",
+    author: "Jerome",
+    description: "Capture a screenshot of a website.",
+    category: "Others",
+    link: ["/api/screenshot?url="] // Relative link to the endpoint
 };
 
 // Screenshot Route
 router.get('/screenshot', async (req, res) => {
-  const url = req.query.url; // URL passed as a query parameter
-  if (!url) {
-    return res.status(400).send('Error: No URL provided.');
-  }
+    const url = req.query.url; // URL to capture
 
-  try {
-    // Launch Puppeteer browser
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+    if (!url) {
+        return res.status(400).send({
+            status: 400,
+            message: "Error: No URL provided. Please include the 'url' query parameter.",
+        });
+    }
 
-    // Open the URL
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    try {
+        // Define the file path for the screenshot
+        const screenshotPath = `screenshot.png`; // Save in the current directory
 
-    // Define screenshot file path
-    const screenshotPath = path.resolve('screenshot.png');
+        // Capture the screenshot
+        await captureWebsite.file(url, screenshotPath, {
+            width: 1280, // Width of the viewport
+            height: 720, // Height of the viewport
+            fullPage: true, // Capture the full page
+            overwrite: true, // Overwrite the file if it exists
+        });
 
-    // Take screenshot
-    await page.screenshot({ path: screenshotPath });
-
-    // Close browser
-    await browser.close();
-
-    // Send screenshot as response
-    res.sendFile(screenshotPath, (err) => {
-      if (err) {
-        res.status(500).send('Error sending screenshot.');
-      } else {
-        // Optionally delete the screenshot after sending
-        fs.unlinkSync(screenshotPath);
-      }
-    });
-  } catch (error) {
-    res.status(500).send('Error capturing screenshot: ' + error.message);
-  }
+        // Send the screenshot as a response
+        res.sendFile(screenshotPath, (err) => {
+            if (err) {
+                res.status(500).send({
+                    status: 500,
+                    message: "Error sending the screenshot.",
+                });
+            }
+        });
+    } catch (error) {
+        res.status(500).send({
+            status: 500,
+            message: "Error capturing screenshot: " + error.message,
+        });
+    }
 });
 
 export { router, serviceMetadata };

@@ -8,7 +8,7 @@ const serviceMetadata = {
     name: "Random Cat Image",
     author: "Jerome",
     description: "Fetch a random cat image.",
-    category: "Fun",
+    category: "Others",
     link: ["/api/random-cat"] // Relative link to the endpoint
 };
 

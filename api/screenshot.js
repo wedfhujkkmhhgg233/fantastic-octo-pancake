@@ -11,7 +11,7 @@ const serviceMetadata = {
   author: 'Jerome',
   description: 'Capture a screenshot of a URL.',
   category: 'Others',
-  link: '/api/screenshot?url=',
+  link: ["/api/screenshot?url="]
 };
 
 // Screenshot Route

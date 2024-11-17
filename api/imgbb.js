@@ -92,7 +92,7 @@ const serviceMetadata = {
   author: "Jerome",
   description: "Uploads an image to Imgbb from a provided URL.",
   category: "Image Upload",
-  link: "/api/upload-image?imageUrl=", // Relative link to the endpoint
+  link: ["/api/upload-image?imageUrl="] // Relative link to the endpoint
 };
 
 export { router, serviceMetadata };

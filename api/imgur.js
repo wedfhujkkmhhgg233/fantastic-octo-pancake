@@ -1,62 +1,21 @@
 import express from 'express';
-import axios from 'axios';
-import https from 'https';
-import http from 'http';
-import FormData from 'form-data';
-
-// Set your Imgur client ID here
-const clientId = '1d3369d09c344a4';  // Replace with your actual Client ID
+import imgur from 'imgur';
 
 const router = express.Router();
 
-// Function to download image from URL
-async function downloadImage(imageUrl) {
-  return new Promise((resolve, reject) => {
-    const client = imageUrl.startsWith('https') ? https : http;
-    client.get(imageUrl, (response) => {
-      if (response.statusCode !== 200) {
-        reject(new Error('Failed to download image.'));
-        return;
-      }
-      const data = [];
-      response.on('data', chunk => data.push(chunk));
-      response.on('end', () => resolve(Buffer.concat(data)));
-    }).on('error', (err) => reject(err));
-  });
-}
+// Set your Imgur client ID
+imgur.setClientId('1d3369d09c344a4'); // Replace with your Imgur Client ID
 
-// Function to upload image to Imgur
-async function uploadImage(imageUrl) {
+// Function to upload image using Imgur npm
+async function uploadImageToImgur(imageUrl) {
   try {
-    // Download the image
-    const imageBuffer = await downloadImage(imageUrl);
+    const response = await imgur.uploadUrl(imageUrl);
 
-    // Create form data
-    const form = new FormData();
-    form.append('image', imageBuffer, { filename: 'image.jpg' });
-
-    // Make the request to upload the image to Imgur
-    const response = await axios.post('https://api.imgur.com/3/image', form, {
-      headers: {
-        'Authorization': `Client-ID ${clientId}`,
-        ...form.getHeaders(),  // Include form data headers
-      },
-    });
-
-    // Return the Imgur link in the response
-    if (response.data.success) {
-      return {
-        status: 200,
-        message: 'Image uploaded successfully',
-        imgUrl: response.data.data.link,
-      };
-    } else {
-      return {
-        status: 500,
-        message: 'Image upload failed',
-        error: response.data.data.error,
-      };
-    }
+    return {
+      status: 200,
+      message: 'Image uploaded successfully',
+      imgUrl: response.link,
+    };
   } catch (error) {
     return {
       status: 500,
@@ -66,7 +25,7 @@ async function uploadImage(imageUrl) {
   }
 }
 
-// ImgUploader Route - Now a GET route
+// Endpoint for uploading image
 router.get('/upload-image', async (req, res) => {
   const { imageUrl } = req.query;
 
@@ -77,19 +36,21 @@ router.get('/upload-image', async (req, res) => {
     });
   }
 
-  const result = await uploadImage(imageUrl);
-  
-  // Send response with the result of the upload
-  res.status(result.status).json(result);
+  const result = await uploadImageToImgur(imageUrl);
+
+  // Send the prettified JSON response
+  res.status(result.status).json(
+    JSON.stringify(result, null, 2) // Prettify JSON with 2 spaces
+  );
 });
 
 // Service Metadata
 const serviceMetadata = {
-  name: "Imgur Image Uploader",
-  author: "Jerome",
-  description: "Uploads an image to Imgur from a provided URL.",
-  category: "Others",
-  link: ["/api/upload-image?imageUrl="] // Relative link to the endpoint
+  name: 'Imgur Image Uploader',
+  author: 'Jerome',
+  description: 'Uploads an image to Imgur from a provided URL using the Imgur npm package.',
+  category: 'Image Upload',
+  link: ["/api/upload-image"] // Relative link to the endpoint
 };
 
 export { router, serviceMetadata };

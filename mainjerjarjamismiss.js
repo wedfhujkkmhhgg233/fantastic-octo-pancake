@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as catfactRouter } from './api/catfact.js';
+app.use('/service/api', catfactRouter);
+
 import { router as dogimageRouter } from './api/dogimage.js';
 app.use('/service/api', dogimageRouter);
 

@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as imgbbRouter } from './api/imgbb.js';
+app.use('/service/api', imgbbRouter);
+
 import { router as imgurRouter } from './api/imgur.js';
 app.use('/service/api', imgurRouter);
 

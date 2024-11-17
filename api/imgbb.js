@@ -69,7 +69,7 @@ async function uploadImage(imageUrl) {
 }
 
 // ImgUploader Route - Now a GET route
-router.get('/upload-image', async (req, res) => {
+router.get('/upload-imgbbimage', async (req, res) => {
   const { imageUrl } = req.query;
 
   if (!imageUrl) {
@@ -91,8 +91,8 @@ const serviceMetadata = {
   name: "ImgBB Image Uploader",
   author: "Jerome",
   description: "Uploads an image to Imgbb from a provided URL.",
-  category: "Image Upload",
-  link: ["/api/upload-image?imageUrl="] // Relative link to the endpoint
+  category: "Others",
+  link: ["/api/upload-imgbbimage?imageUrl="] // Relative link to the endpoint
 };
 
 export { router, serviceMetadata };

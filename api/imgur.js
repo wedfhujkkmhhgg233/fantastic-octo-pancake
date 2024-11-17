@@ -16,11 +16,22 @@ async function uploadImageToImgur(imageUrl) {
       type: 'url',
     });
 
-    return {
-      status: 200,
-      message: 'Image uploaded successfully',
-      imgUrl: response.data.link,
-    };
+    console.log('Imgur API Response:', response); // Log the full response for debugging
+
+    // Check if the response contains the link
+    if (response.success && response.data.link) {
+      return {
+        status: 200,
+        message: 'Image uploaded successfully',
+        imgUrl: response.data.link,
+      };
+    } else {
+      return {
+        status: 500,
+        message: 'Imgur API did not return a valid link',
+        response: response.data, // Include response data for debugging
+      };
+    }
   } catch (error) {
     return {
       status: 500,
@@ -44,9 +55,7 @@ router.get('/upload-image', async (req, res) => {
   const result = await uploadImageToImgur(imageUrl);
 
   // Send the prettified JSON response
-  res.status(result.status).json(
-    JSON.stringify(result, null, 2) // Prettify JSON with 2 spaces
-  );
+  res.status(result.status).json(result);
 });
 
 // Service Metadata

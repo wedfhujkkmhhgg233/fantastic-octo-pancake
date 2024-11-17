@@ -49,7 +49,7 @@ const serviceMetadata = {
   name: 'Imgur Image Uploader',
   author: 'Jerome',
   description: 'Uploads an image to Imgur from a provided URL using the Imgur npm package.',
-  category: 'Image Upload',
+  category: 'Others',
   link: ["/api/upload-image"] // Relative link to the endpoint
 };
 

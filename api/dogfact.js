@@ -10,7 +10,7 @@ const serviceMetadata = {
     author: "Jerome",  // Added author tag
     description: "Fetch a random dog fact from a local dog facts file.",
     category: "Others",
-    link: "/api/random-dog-fact", // Relative link to the endpoint
+    link: ["/api/random-dog-fact"] // Relative link to the endpoint
 };
 
 // Random Dog Fact Route

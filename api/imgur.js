@@ -1,20 +1,25 @@
 import express from 'express';
-import imgur from 'imgur';
+import { ImgurClient } from 'imgur';
 
 const router = express.Router();
 
-// Set your Imgur client ID
-imgur.setClientId('1d3369d09c344a4'); // Replace with your Imgur Client ID
+// Initialize ImgurClient
+const client = new ImgurClient({
+  clientId: '1d3369d09c344a4', // Replace with your Imgur Client ID
+});
 
-// Function to upload image using Imgur npm
+// Function to upload image using ImgurClient
 async function uploadImageToImgur(imageUrl) {
   try {
-    const response = await imgur.uploadUrl(imageUrl);
+    const response = await client.upload({
+      image: imageUrl,
+      type: 'url',
+    });
 
     return {
       status: 200,
       message: 'Image uploaded successfully',
-      imgUrl: response.link,
+      imgUrl: response.data.link,
     };
   } catch (error) {
     return {
@@ -48,9 +53,9 @@ router.get('/upload-image', async (req, res) => {
 const serviceMetadata = {
   name: 'Imgur Image Uploader',
   author: 'Jerome',
-  description: 'Uploads an image to Imgur from a provided URL using the Imgur npm package.',
+  description: 'Uploads an image to Imgur from a provided URL using ImgurClient.',
   category: 'Others',
-  link: ["/api/upload-image"] // Relative link to the endpoint
+  link: ["/api/upload-image?imageUrl="] // Relative link to the endpoint
 };
 
 export { router, serviceMetadata };

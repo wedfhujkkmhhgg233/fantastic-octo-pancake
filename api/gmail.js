@@ -118,4 +118,4 @@ const serviceMetadata = {
 // Make the service metadata pretty
 const prettyServiceMetadata = JSON.stringify(serviceMetadata, null, 2);
 
-export { router, prettyServiceMetadata };
+export { router, serviceMetadata };

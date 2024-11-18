@@ -62,7 +62,7 @@ const serviceMetadata = {
   author: 'Jerome',
   description: 'Generates temporary Gmail addresses and checks inbox for messages.',
   category: 'Others',
-  link: '/api/tempmail?type=gen or inbox&email=', // Relative link to the endpoint
+  link: ["/api/tempmail?type=gen or inbox&email="] // Relative link to the endpoint
 };
 
 export { router, serviceMetadata };

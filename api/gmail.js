@@ -1,68 +1,121 @@
 import express from 'express';
-import GmailNator from './GmailNator.js'; // Ensure GmailNator is in the same directory
+import axios from 'axios';
 
 const router = express.Router();
 
-// Initialize GmailNator
-const gmailNator = new GmailNator();
+// Base URL for 1secmail API
+const baseUrl = 'https://www.1secmail.com/api/v1';
 
-// Function to generate an email or fetch the inbox
-async function handleTempMail(type, email = null) {
+// Function to generate temporary email addresses
+async function generateEmails(count = 1) {
   try {
-    // Initialize GmailNator session
-    await gmailNator.init();
-
-    if (type === 'gen') {
-      // Generate a new temporary Gmail address
-      const emailAddress = await gmailNator.getEmailOnline();
-      return {
-        status: 200,
-        message: 'Temporary Gmail address generated successfully',
-        email: emailAddress,
-      };
-    } else if (type === 'inbox' && email) {
-      // Fetch inbox for the provided email
-      const inbox = await gmailNator.getInbox(email);
-      return {
-        status: 200,
-        message: `Inbox fetched for ${email}`,
-        inbox,
-      };
-    } else {
-      throw new Error('Invalid type or missing email for inbox check');
-    }
+    const response = await axios.get(`${baseUrl}/?action=genRandomMailbox&count=${count}`);
+    return {
+      status: 200,
+      message: 'Temporary email addresses generated successfully',
+      emails: response.data,
+    };
   } catch (error) {
     return {
       status: 500,
-      message: error.message,
+      message: 'Error generating emails',
+      error: error.message,
     };
   }
 }
 
-// Endpoint for handling tempmail actions
-router.get('/tempmail', async (req, res) => {
-  const { type, email } = req.query;
+// Function to fetch inbox for a specific email
+async function fetchInbox(email) {
+  try {
+    const [login, domain] = email.split('@');
+    const response = await axios.get(`${baseUrl}/?action=getMessages&login=${login}&domain=${domain}`);
 
-  if (!type) {
-    return res.status(400).json({
-      status: 400,
-      message: 'Missing required parameter: type',
-    });
+    if (response.data.length === 0) {
+      return {
+        status: 200,
+        message: 'No messages in the inbox',
+        inbox: [],
+      };
+    }
+
+    // Fetch full message details for each email
+    const messages = await Promise.all(
+      response.data.map(async (message) => {
+        const messageResponse = await axios.get(
+          `${baseUrl}/?action=readMessage&login=${login}&domain=${domain}&id=${message.id}`
+        );
+        return messageResponse.data;
+      })
+    );
+
+    return {
+      status: 200,
+      message: `Fetched inbox for ${email}`,
+      inbox: messages,
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      message: 'Error fetching inbox',
+      error: error.message,
+    };
   }
+}
 
-  const result = await handleTempMail(type, email);
+// Endpoint to handle tempmail actions
+router.get('/tempmail', async (req, res) => {
+  const { type, email, count } = req.query;
 
-  // Send the prettified JSON response
-  res.status(result.status).json(result);
+  let result;
+  if (type === 'gen') {
+    // Generate temporary email addresses
+    result = await generateEmails(count || 1);
+    return res.status(result.status).json(JSON.parse(JSON.stringify(result, null, 2)));
+  } else if (type === 'inbox') {
+    if (!email) {
+      return res.status(400).json(
+        JSON.parse(
+          JSON.stringify(
+            {
+              status: 400,
+              message: 'Missing email parameter',
+            },
+            null,
+            2
+          )
+        )
+      );
+    }
+    // Fetch inbox for the provided email
+    result = await fetchInbox(email);
+    return res.status(result.status).json(JSON.parse(JSON.stringify(result, null, 2)));
+  } else {
+    return res.status(400).json(
+      JSON.parse(
+        JSON.stringify(
+          {
+            status: 400,
+            message: 'Invalid type parameter. Use "gen" or "inbox".',
+          },
+          null,
+          2
+        )
+      )
+    );
+  }
 });
 
 // Service Metadata
 const serviceMetadata = {
-  name: 'Temporary Gmail Generator',
+  name: '1SecMail Temporary Mail',
   author: 'Jerome',
-  description: 'Generates temporary Gmail addresses and checks inbox for messages.',
+  description:
+    'Generates temporary email addresses using 1SecMail API and fetches inbox with message details.',
   category: 'Others',
-  link: ["/api/tempmail?type=&email="] // Relative link to the endpoint
+  link: ["/api/tempmail?type=gen+or+inbox&email="] // Relative link to the endpoint
 };
 
-export { router, serviceMetadata };
+// Make the service metadata pretty
+const prettyServiceMetadata = JSON.stringify(serviceMetadata, null, 2);
+
+export { router, prettyServiceMetadata };

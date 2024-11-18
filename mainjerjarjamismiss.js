@@ -112,6 +112,9 @@ app.get('/service-list', async (req, res) => {
 import { router as bingRouter } from './api/bing.js';
 app.use('/service/api', bingRouter);
 
+import { router as appstateRouter } from './api/appstate.js';
+app.use('/service/api', appstateRouter);
+
 import { router as gmailRouter } from './api/gmail.js';
 app.use('/service/api', gmailRouter);
 

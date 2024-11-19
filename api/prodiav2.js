@@ -31,9 +31,9 @@ router.get('/prodia-image', async (req, res) => {
                 prompt: prompt,
                 model: "prodia",
                 data: {
-                    model: "absolutereality_V16.safetensors [37db0fc3]",
+                    model: "ICantBelieveItsNotPhotography_seco.safetensors [4e7a3dfd]",
                     steps: 25,
-                    cfg_scale: 7,
+                    cfg_scale: 30,
                     sampler: "DPM++ 2M Karras",
                     negative_prompt: ""
                 }

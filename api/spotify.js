@@ -37,31 +37,32 @@ router.get('/spotify-download', async (req, res) => {
     }
 
     try {
-        // First API: Get the track URL
-        const spotifyApiUrl = `https://spotify-play-iota.vercel.app/spotify?query=${encodeURIComponent(query)}`;
-        const trackResponse = await axios.get(spotifyApiUrl);
+        // Step 1: Search for tracks using the provided API
+        const searchUrl = `https://api.kenliejugarap.com/spotify-search/?title=${encodeURIComponent(query)}`;
+        const searchResponse = await axios.get(searchUrl);
 
-        if (!trackResponse.data || !trackResponse.data.trackURLs || trackResponse.data.trackURLs.length === 0) {
-            throw new Error('Invalid data from the Spotify API');
+        if (!searchResponse.data || !searchResponse.data.response || searchResponse.data.response.length === 0) {
+            throw new Error('No tracks found');
         }
 
-        const firstTrackUrl = trackResponse.data.trackURLs[0];
+        const firstTrack = searchResponse.data.response[0];
+        const firstTrackUrl = firstTrack.url;
 
-        // Second API: Get track details and download URL
-        const trackDetailsUrl = `https://joshweb.click/api/spotify2?q=${encodeURIComponent(firstTrackUrl)}`;
-        const trackDetails = await axios.get(trackDetailsUrl);
+        // Step 2: Get the download URL for the first track
+        const downloadUrlApi = `https://ccprojectapis.ddns.net/api/spotifydl?url=${encodeURIComponent(firstTrackUrl)}`;
+        const downloadResponse = await axios.get(downloadUrlApi);
 
-        if (!trackDetails.data || !trackDetails.data.result || !trackDetails.data.result.download_url) {
-            throw new Error('Invalid data from the track details API');
+        if (!downloadResponse.data || !downloadResponse.data.download || !downloadResponse.data.download.file_url) {
+            throw new Error('Download URL not found');
         }
 
-        const downloadUrl = trackDetails.data.result.download_url;
+        const downloadUrl = downloadResponse.data.download.file_url;
 
-        // Select a random existing MP3 file name
+        // Step 3: Select a random existing MP3 file name
         const selectedFileName = getRandomExistingFileName();
         const mp3Path = path.join(__dirname, '..', 'public', selectedFileName);
 
-        // Download the MP3 file
+        // Step 4: Download the MP3 file
         const response = await axios.get(downloadUrl, { responseType: 'stream' });
         const mp3Stream = fs.createWriteStream(mp3Path);
 
@@ -73,7 +74,7 @@ router.get('/spotify-download', async (req, res) => {
             res.status(500).json({ error: 'Error writing to file' });
         });
 
-        // Set file expiration (if needed)
+        // Set file expiration
         setTimeout(() => {
             if (fs.existsSync(mp3Path)) {
                 fs.unlinkSync(mp3Path);
@@ -82,7 +83,18 @@ router.get('/spotify-download', async (req, res) => {
 
         mp3Stream.on('finish', () => {
             const fileUrl = `https://jerome-web.gleeze.com/public/${selectedFileName}`;
-            res.json({ downloadUrl: fileUrl });
+            res.json({
+                metadata: {
+                    album: firstTrack.artist_album,
+                    album_artist: firstTrack.artist,
+                    artist: firstTrack.artist,
+                    track_name: firstTrack.title,
+                    release_date: firstTrack.album_release_date,
+                    spotify_url: firstTrackUrl,
+                    cover_image: downloadResponse.data.metadata.cover_image || '',
+                },
+                downloadUrl: fileUrl,
+            });
         });
 
     } catch (error) {

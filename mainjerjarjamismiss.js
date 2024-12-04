@@ -343,9 +343,6 @@ app.use('/service/api', searchRouter);
 import { router as geminiRouter } from './api/gemini.js';
 app.use('/service/api', geminiRouter);
 
-import { router as alldlRouter } from './api/alldl.js';
-app.use('/service/api', alldlRouter);
-
 app.use('/service/api', aiRouter);
 
 // Route to serve downloader.html

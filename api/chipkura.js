@@ -40,6 +40,8 @@ router.get('/chipkura', async (req, res) => {
   const parseResponse = (raw) => {
     const lines = raw.split('\n');
     let browseWebDetected = false;
+    let fullToolData = [];
+
     let result = { message: '', image: null };
 
     for (const line of lines) {
@@ -52,42 +54,47 @@ router.get('/chipkura', async (req, res) => {
       try {
         if (code === '0') {
           result.message += JSON.parse(content);
-        } else if (code === '9') {
+        } else if (code === '9' || code === 'a') {
           const json = JSON.parse(content);
+          fullToolData.push(json);
+
           if (json.toolName === 'browseWeb') {
             browseWebDetected = true;
           }
-        } else if (code === 'a') {
-          const json = JSON.parse(content);
-          if (json.result?.organic) {
-            const articles = json.result.organic.map((item, i) =>
-              `Result ${i + 1}:\nTitle: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}\n`
-            ).join('\n');
-            result.message += '\n' + articles;
-          } else {
-            const match = json.result.match(/https?:\/\/[^\s)]+/);
-            if (match) result.image = match[0];
-          }
+
+          // stop parsing title/link/snippet if browseWeb is detected
         }
       } catch (e) {
         console.warn(`Skipping malformed line [${code}]: ${content}`);
       }
     }
 
-    return { result, browseWebDetected };
+    return { result, browseWebDetected, fullToolData };
   };
 
   try {
-    // First request
+    // First response
     const raw1 = await sendToChipp();
-    const { browseWebDetected } = parseResponse(raw1);
+    const { browseWebDetected, fullToolData } = parseResponse(raw1);
 
     if (browseWebDetected) {
       messages.push({ role: 'user', content: userMessage });
+
+      // Second response after browseWeb
       const raw2 = await sendToChipp();
-      const { result } = parseResponse(raw2);
-      messages.push({ role: 'assistant', content: result.message });
-      return res.json(result);
+      const { result, fullToolData: secondToolData } = parseResponse(raw2);
+
+      // Save the full tool data as a stringified assistant response
+      messages.push({
+        role: 'assistant',
+        content: '',
+        toolInvocations: secondToolData
+      });
+
+      return res.json({
+        message: '',
+        toolInvocations: secondToolData
+      });
     } else {
       const { result } = parseResponse(raw1);
       messages.push({ role: 'assistant', content: result.message });
@@ -101,7 +108,7 @@ router.get('/chipkura', async (req, res) => {
 
 const serviceMetadata = {
   name: "chipkura",
-  description: "Talk to Chipp AI with optional image input and memory. Automatically resends if browseWeb is triggered.",
+  description: "Talk to Chipp AI with optional image input and memory. If browseWeb is triggered, full tool output is stored.",
   category: "AI",
   author: "Jerome",
   link: ["/api/chipkura?message=hi&userid=&imageurl="]

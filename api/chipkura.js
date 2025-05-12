@@ -39,87 +39,94 @@ router.get('/chipkura', async (req, res) => {
   };
 
   const parseResponse = (raw) => {
-    const lines = raw.split('\n');
-    let browseWebDetected = false;
-    let result = { message: '', image: null };
-    let browseData = [];
+  const lines = raw.split('\n');
+  let browseWebDetected = false;
+  let retrieveUrlDetected = false;
+  let result = { message: '', image: null };
+  let browseData = [];
+  let retrieveUrlData = '';
 
-    for (const line of lines) {
-      const index = line.indexOf(':');
-      if (index === -1) continue;
-      const code = line.slice(0, index);
-      const content = line.slice(index + 1).trim();
-      if (!content) continue;
+  for (const line of lines) {
+    const index = line.indexOf(':');
+    if (index === -1) continue;
+    const code = line.slice(0, index);
+    const content = line.slice(index + 1).trim();
+    if (!content) continue;
 
-      try {
-        if (code === '0') {
-          result.message += JSON.parse(content);
-        } else if (code === '9') {
-          const json = JSON.parse(content);
-          if (json.toolName === 'browseWeb') {
-            browseWebDetected = true;
-          }
-        } else if (code === 'a') {
-          const json = JSON.parse(content);
-          if (json.result?.organic) {
-            browseData = json.result.organic.map(item => ({
-              title: item.title,
-              link: item.link,
-              snippet: item.snippet
-            }));
-
-            const formatted = browseData.map((item, i) =>
-              `Result ${i + 1}:\nTitle: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}\n`
-            ).join('\n');
-
-            result.message += '\n' + formatted;
-          } else {
-            const match = json.result.match(/https?:\/\/[^\s)]+/);
-            if (match) result.image = match[0];
-          }
+    try {
+      if (code === '0') {
+        result.message += JSON.parse(content);
+      } else if (code === '9') {
+        const json = JSON.parse(content);
+        if (json.toolName === 'browseWeb') {
+          browseWebDetected = true;
+        } else if (json.toolName === 'retrieveUrl') {
+          retrieveUrlDetected = true;
         }
-      } catch (e) {
-        console.warn(`Skipping malformed line [${code}]: ${content}`);
+      } else if (code === 'a') {
+        const json = JSON.parse(content);
+        if (json.result?.organic) {
+          // browseWeb content
+          browseData = json.result.organic.map(item => ({
+            title: item.title,
+            link: item.link,
+            snippet: item.snippet
+          }));
+          const formatted = browseData.map((item, i) =>
+            `Result ${i + 1}:\nTitle: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}`
+          ).join('\n');
+          result.message += '\n' + formatted;
+        } else if (json.result?.markdown) {
+          // retrieveUrl content
+          retrieveUrlData = json.result.markdown;
+        } else {
+          const match = json.result?.match?.(/https?:\/\/[^\s)]+/);
+          if (match) result.image = match[0];
+        }
       }
+    } catch (e) {
+      console.warn(`Skipping malformed line [${code}]: ${content}`);
     }
+  }
 
-    return { result, browseWebDetected, browseData };
-  };
+  return { result, browseWebDetected, browseData, retrieveUrlDetected, retrieveUrlData };
+};
 
   try {
-    const raw1 = await sendToChipp();
-    const { result: result1, browseWebDetected, browseData } = parseResponse(raw1);
+  const raw1 = await sendToChipp();
+  const { result: result1, browseWebDetected, browseData, retrieveUrlDetected, retrieveUrlData } = parseResponse(raw1);
 
+  if (browseWebDetected || retrieveUrlDetected) {
+    // Store browse results if present
     if (browseWebDetected) {
-      // Store browse results in chat history (optional: separate if you like)
       const browseMsg = browseData.map((item, i) =>
         `Title: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}`
       ).join('\n\n');
-
-      // Store structured browse data in history
-messages.push({
-  role: 'assistant',
-  content: browseData.map((item, i) =>
-    `Browse Result ${i + 1}:\nTitle: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}`
-  ).join('\n\n')
-});
-
-      // Resend same user message again without attaching the browse output
-      messages.push({ role: 'user', content: userMessage });
-      const raw2 = await sendToChipp();
-      const { result: result2 } = parseResponse(raw2);
-
-      messages.push({ role: 'assistant', content: result2.message });
-      return res.json(result2);
-    } else {
-      messages.push({ role: 'assistant', content: result1.message });
-      return res.json(result1);
+      messages.push({ role: 'assistant', content: browseMsg });
     }
-  } catch (err) {
-    console.error('[chipkura error]', err.message);
-    res.status(500).json({ error: 'Failed to contact Chipp AI.' });
+
+    // Store retrieveUrl markdown if present
+    if (retrieveUrlDetected && retrieveUrlData) {
+      messages.push({ role: 'assistant', content: retrieveUrlData });
+    }
+
+    chatHistory.set(userid, messages); // update history
+
+    // Resend same user message again
+    messages.push({ role: 'user', content: userMessage });
+    const raw2 = await sendToChipp();
+    const { result: result2 } = parseResponse(raw2);
+
+    messages.push({ role: 'assistant', content: result2.message });
+    return res.json(result2);
+  } else {
+    messages.push({ role: 'assistant', content: result1.message });
+    return res.json(result1);
   }
-});
+} catch (err) {
+  console.error('[chipkura error]', err.message);
+  res.status(500).json({ error: 'Failed to contact Chipp AI.' });
+}
 
 const serviceMetadata = {
   name: "chipkura",

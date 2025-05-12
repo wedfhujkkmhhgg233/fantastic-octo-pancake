@@ -15,13 +15,14 @@ router.get('/chipkura', async (req, res) => {
   const messages = chatHistory.get(userid);
 
   const userMessage = imageurl
-    ? `${message} ![](${imageurl}) %START_MESSAGE_METADATA%(The user has uploaded images to this message. Here are the URLs for the images: ${imageurl})`
+    ? `${message}  %START_MESSAGE_METADATA%(The user has uploaded images to this message. Here are the URLs for the images: ${imageurl})`
     : message;
 
   messages.push({ role: 'user', content: userMessage });
 
   const sendToChipp = async () => {
-    const response = await axios.post('https://kurapika-42900.chipp.ai/api/chat',
+    const response = await axios.post(
+      'https://kurapika-42900.chipp.ai/api/chat',
       { messages, chatSessionId },
       {
         headers: {
@@ -30,7 +31,7 @@ router.get('/chipkura', async (req, res) => {
           'cookie': '__Host-next-auth.csrf-token=your-token; __Secure-next-auth.callback-url=https://app.chipp.ai; userId_42900=your-userid; correlationId=your-correlation-id',
           'origin': 'https://kurapika-42900.chipp.ai',
           'referer': 'https://kurapika-42900.chipp.ai/w/chat/',
-          'user-agent': 'Mozilla/5.0 (Linux; Android 10; K)'
+          'user-agent': 'Mozilla/5.0 (Linux; Android 10; K)',
         }
       }
     );
@@ -40,9 +41,8 @@ router.get('/chipkura', async (req, res) => {
   const parseResponse = (raw) => {
     const lines = raw.split('\n');
     let browseWebDetected = false;
-    let fullToolData = [];
-
     let result = { message: '', image: null };
+    let toolResponse = '';
 
     for (const line of lines) {
       const index = line.indexOf(':');
@@ -54,52 +54,53 @@ router.get('/chipkura', async (req, res) => {
       try {
         if (code === '0') {
           result.message += JSON.parse(content);
-        } else if (code === '9' || code === 'a') {
+        } else if (code === '9') {
           const json = JSON.parse(content);
-          fullToolData.push(json);
-
           if (json.toolName === 'browseWeb') {
             browseWebDetected = true;
+            toolResponse += line + '\n';
           }
+        } else if (code === 'a') {
+          const json = JSON.parse(content);
+          toolResponse += line + '\n';
 
-          // stop parsing title/link/snippet if browseWeb is detected
+          if (json.result?.organic) {
+            const summaries = json.result.organic.map((item, i) =>
+              `${item.snippet}`
+            ).join('\n');
+            result.message += '\n' + summaries;
+          } else {
+            const match = json.result.match(/https?:\/\/[^\s)]+/);
+            if (match) result.image = match[0];
+          }
         }
       } catch (e) {
         console.warn(`Skipping malformed line [${code}]: ${content}`);
       }
     }
 
-    return { result, browseWebDetected, fullToolData };
+    return { result, browseWebDetected, toolResponse };
   };
 
   try {
-    // First response
     const raw1 = await sendToChipp();
-    const { browseWebDetected, fullToolData } = parseResponse(raw1);
+    const { result, browseWebDetected, toolResponse } = parseResponse(raw1);
 
-    if (browseWebDetected) {
-      messages.push({ role: 'user', content: userMessage });
+    if (browseWebDetected && toolResponse) {
+      // Save tool output
+      messages.push({ role: 'assistant', content: '', toolInvocations: [JSON.parse(toolResponse.trim())] });
 
-      // Second response after browseWeb
+      // Ask Chipp again
       const raw2 = await sendToChipp();
-      const { result, fullToolData: secondToolData } = parseResponse(raw2);
+      const { result: secondResult } = parseResponse(raw2);
+      messages.push({ role: 'assistant', content: secondResult.message });
 
-      // Save the full tool data as a stringified assistant response
-      messages.push({
-        role: 'assistant',
-        content: '',
-        toolInvocations: secondToolData
-      });
-
-      return res.json({
-        message: '',
-        toolInvocations: secondToolData
-      });
+      return res.json(secondResult);
     } else {
-      const { result } = parseResponse(raw1);
       messages.push({ role: 'assistant', content: result.message });
       return res.json(result);
     }
+
   } catch (err) {
     console.error('[chipkura error]', err.message);
     res.status(500).json({ error: 'Failed to contact Chipp AI.' });
@@ -108,10 +109,10 @@ router.get('/chipkura', async (req, res) => {
 
 const serviceMetadata = {
   name: "chipkura",
-  description: "Talk to Chipp AI with optional image input and memory. If browseWeb is triggered, full tool output is stored.",
+  description: "Talk to Chipp AI with optional image input and memory. Automatically resends if browseWeb is triggered.",
   category: "AI",
   author: "Jerome",
-  link: ["/api/chipkura?message=hi&userid=&imageurl="]
+  link: ["/service/chipkura?message=hi&userid=&imageurl="]
 };
 
 export { router, serviceMetadata };

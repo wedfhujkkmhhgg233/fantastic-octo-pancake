@@ -1,7 +1,7 @@
-const express = require('express');
-const axios = require('axios');
-const router = express.Router();
+import express from 'express';
+import axios from 'axios';
 
+const router = express.Router();
 const chatHistory = new Map();
 
 router.get('/chipkura', async (req, res) => {
@@ -14,7 +14,6 @@ router.get('/chipkura', async (req, res) => {
   if (!chatHistory.has(userid)) chatHistory.set(userid, []);
   const messages = chatHistory.get(userid);
 
-  // Format with image metadata if imageurl is present
   const userMessage = imageurl
     ? `${message} ![](${imageurl}) %START_MESSAGE_METADATA%(The user has uploaded images to this message. Here are the URLs for the images: ${imageurl})`
     : message;
@@ -77,7 +76,6 @@ router.get('/chipkura', async (req, res) => {
 
     messages.push({ role: 'assistant', content: result.message });
 
-    // Handle silent resend for browseWeb
     if (browseWebDetected) {
       messages.push({ role: 'user', content: browseWebDetected });
     }
@@ -94,7 +92,7 @@ const serviceMetadata = {
   description: 'Talk to Chipp AI with optional image input and memory.',
   category: 'AI 🤖',
   author: 'Jerome',
-  usage: '/chipkura?message=hi&userid=123&imageurl='
+  usage: '/chipkura?message=hi&userid=&imageurl='
 };
 
-module.exports = { router, serviceMetadata };
+export { router, serviceMetadata };

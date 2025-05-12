@@ -42,6 +42,7 @@ router.get('/chipkura', async (req, res) => {
     const lines = raw.split('\n');
     let browseWebDetected = false;
     let retrieveUrlDetected = false;
+    let retrieveTool = null;
     let result = { message: '', image: null };
     let browseData = [];
     let retrieveData = null;
@@ -62,10 +63,12 @@ router.get('/chipkura', async (req, res) => {
             browseWebDetected = true;
           } else if (json.toolName === 'retrieveUrl') {
             retrieveUrlDetected = true;
+            retrieveTool = json;
           }
         } else if (code === 'a') {
           const json = JSON.parse(content);
 
+          // BrowseWeb
           if (json.result?.organic) {
             browseData = json.result.organic.map(item => ({
               title: item.title,
@@ -73,12 +76,12 @@ router.get('/chipkura', async (req, res) => {
               snippet: item.snippet
             }));
             const formatted = browseData.map((item, i) =>
-              `Result ${i + 1}:\nTitle: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}\n`
+              `Result ${i + 1}:\nTitle: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}`
             ).join('\n');
             result.message += '\n' + formatted;
           }
 
-          // Handle retrieveUrl markdown
+          // RetrieveUrl
           if (json.result?.markdown) {
             retrieveData = {
               url: json.args?.url,
@@ -88,7 +91,26 @@ router.get('/chipkura', async (req, res) => {
             result.message += '\n' + retrieveData.markdown;
           }
 
-          // Handle images
+          // RetrieveUrl Error (handled here)
+          if (typeof json.result === 'string' && json.toolName === 'retrieveUrl' && json.result.includes('Error:')) {
+            const assistantObj = {
+              role: 'assistant',
+              content: '',
+              toolInvocations: [
+                {
+                  state: 'result',
+                  toolCallId: json.toolCallId,
+                  toolName: json.toolName,
+                  args: json.args,
+                  result: json.result
+                }
+              ]
+            };
+            messages.push(assistantObj);
+            return { result, browseWebDetected, retrieveUrlDetected, retrieveData, retrieveTool, isRetrieveError: true };
+          }
+
+          // Image Detection
           const match = json.result?.match?.(/https?:\/\/[^\s)]+/);
           if (match) result.image = match[0];
         }
@@ -97,18 +119,39 @@ router.get('/chipkura', async (req, res) => {
       }
     }
 
-    return { result, browseWebDetected, retrieveUrlDetected, browseData, retrieveData };
+    return { result, browseWebDetected, retrieveUrlDetected, retrieveData, retrieveTool, isRetrieveError: false };
   };
 
   try {
     const raw1 = await sendToChipp();
-    const { result: result1, browseWebDetected, retrieveUrlDetected, browseData, retrieveData } = parseResponse(raw1);
+    const {
+      result: result1,
+      browseWebDetected,
+      retrieveUrlDetected,
+      retrieveData,
+      retrieveTool,
+      isRetrieveError
+    } = parseResponse(raw1);
 
-    // Log the full raw response if retrieveUrl was detected
-  if (retrieveUrlDetected) {
-    console.log('[Full raw response for retrieveUrl]', raw1);
-  }
-    
+    if (isRetrieveError && retrieveTool?.args?.url) {
+      // Resend only the retrieveUrl tool with a better query
+      const toolCallMessage = {
+        toolInvocations: [{
+          toolName: 'retrieveUrl',
+          args: {
+            url: retrieveTool.args.url,
+            query: `What is the purpose of the website ${retrieveTool.args.url}, what features does it offer, and how does it work?`
+          }
+        }]
+      };
+      messages.push(toolCallMessage);
+
+      const raw2 = await sendToChipp();
+      const { result: result2 } = parseResponse(raw2);
+      messages.push({ role: 'assistant', content: result2.message });
+      return res.json(result2);
+    }
+
     if (browseWebDetected) {
       messages.push({
         role: 'assistant',
@@ -116,19 +159,17 @@ router.get('/chipkura', async (req, res) => {
           `Browse Result ${i + 1}:\nTitle: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}`
         ).join('\n\n')
       });
-
       messages.push({ role: 'user', content: userMessage });
       const raw2 = await sendToChipp();
       const { result: result2 } = parseResponse(raw2);
       messages.push({ role: 'assistant', content: result2.message });
       return res.json(result2);
 
-    } else if (retrieveUrlDetected) {
+    } else if (retrieveUrlDetected && retrieveData?.markdown) {
       messages.push({
         role: 'assistant',
         content: retrieveData.markdown
       });
-
       messages.push({ role: 'user', content: userMessage });
       const raw2 = await sendToChipp();
       const { result: result2 } = parseResponse(raw2);
@@ -139,6 +180,7 @@ router.get('/chipkura', async (req, res) => {
       messages.push({ role: 'assistant', content: result1.message });
       return res.json(result1);
     }
+
   } catch (err) {
     console.error('[chipkura error]', err.message);
     res.status(500).json({ error: 'Failed to contact Chipp AI.' });
@@ -147,10 +189,10 @@ router.get('/chipkura', async (req, res) => {
 
 const serviceMetadata = {
   name: "chipkura",
-  description: "Talk to Chipp AI with optional image input and memory. Supports browseWeb and retrieveUrl tool handling.",
+  description: "Talk to Chipp AI with optional image input and memory. Handles browseWeb and retrieveUrl, including retry on errors.",
   category: "AI",
   author: "Jerome",
-  link: ["/api/chipkura?message=hi&userid=&imageurl="]
+  link: ["/service/chipkura?message=hi&userid=&imageurl="]
 };
 
 export { router, serviceMetadata };

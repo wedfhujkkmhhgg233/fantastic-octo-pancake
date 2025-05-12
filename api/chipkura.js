@@ -20,7 +20,7 @@ router.get('/chipkura', async (req, res) => {
 
   messages.push({ role: 'user', content: userMessage });
 
-  try {
+  const sendToChipp = async () => {
     const response = await axios.post('https://kurapika-42900.chipp.ai/api/chat',
       { messages, chatSessionId },
       {
@@ -34,12 +34,13 @@ router.get('/chipkura', async (req, res) => {
         }
       }
     );
+    return response.data;
+  };
 
-    const raw = response.data;
+  const parseResponse = (raw) => {
     const lines = raw.split('\n');
-
-    const result = { message: '', image: null };
-    let browseWebDetected = null;
+    let browseWebDetected = false;
+    let result = { message: '', image: null };
 
     for (const line of lines) {
       const index = line.indexOf(':');
@@ -54,8 +55,7 @@ router.get('/chipkura', async (req, res) => {
         } else if (code === '9') {
           const json = JSON.parse(content);
           if (json.toolName === 'browseWeb') {
-            browseWebDetected = userMessage;
-            result.message += `\n(Browsed: ${json.args?.prompt})`;
+            browseWebDetected = true;
           }
         } else if (code === 'a') {
           const json = JSON.parse(content);
@@ -74,13 +74,25 @@ router.get('/chipkura', async (req, res) => {
       }
     }
 
-    messages.push({ role: 'assistant', content: result.message });
+    return { result, browseWebDetected };
+  };
+
+  try {
+    // First request
+    const raw1 = await sendToChipp();
+    const { browseWebDetected } = parseResponse(raw1);
 
     if (browseWebDetected) {
-      messages.push({ role: 'user', content: browseWebDetected });
+      messages.push({ role: 'user', content: userMessage });
+      const raw2 = await sendToChipp();
+      const { result } = parseResponse(raw2);
+      messages.push({ role: 'assistant', content: result.message });
+      return res.json(result);
+    } else {
+      const { result } = parseResponse(raw1);
+      messages.push({ role: 'assistant', content: result.message });
+      return res.json(result);
     }
-
-    res.json(result);
   } catch (err) {
     console.error('[chipkura error]', err.message);
     res.status(500).json({ error: 'Failed to contact Chipp AI.' });
@@ -89,7 +101,7 @@ router.get('/chipkura', async (req, res) => {
 
 const serviceMetadata = {
   name: "chipkura",
-  description: "Talk to Chipp AI with optional image input and memory.",
+  description: "Talk to Chipp AI with optional image input and memory. Automatically resends if browseWeb is triggered.",
   category: "AI",
   author: "Jerome",
   link: ["/api/chipkura?message=hi&userid=&imageurl="]

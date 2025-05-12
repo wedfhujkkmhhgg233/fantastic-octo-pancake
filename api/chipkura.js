@@ -192,7 +192,7 @@ const serviceMetadata = {
   description: "Talk to Chipp AI with optional image input and memory. Handles browseWeb and retrieveUrl, including retry on errors.",
   category: "AI",
   author: "Jerome",
-  link: ["/service/chipkura?message=hi&userid=&imageurl="]
+  link: ["/api/service/chipkura?message=hi&userid=&imageurl="]
 };
 
 export { router, serviceMetadata };

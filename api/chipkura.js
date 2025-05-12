@@ -88,11 +88,11 @@ router.get('/chipkura', async (req, res) => {
 });
 
 const serviceMetadata = {
-  name: 'chipkura',
-  description: 'Talk to Chipp AI with optional image input and memory.',
-  category: 'AI 🤖',
-  author: 'Jerome',
-  usage: '/api/chipkura?message=hi&userid=&imageurl='
+  name: "chipkura",
+  description: "Talk to Chipp AI with optional image input and memory.",
+  category: "AI",
+  author: "Jerome",
+  link: ["/api/chipkura?message=hi&userid=&imageurl="]
 };
 
 export { router, serviceMetadata };

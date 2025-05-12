@@ -96,7 +96,13 @@ router.get('/chipkura', async (req, res) => {
         `Title: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}`
       ).join('\n\n');
 
-      chatHistory.set(userid, messages); // Ensure update
+      // Store structured browse data in history
+messages.push({
+  role: 'assistant',
+  content: browseData.map((item, i) =>
+    `Browse Result ${i + 1}:\nTitle: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}`
+  ).join('\n\n')
+});
 
       // Resend same user message again without attaching the browse output
       messages.push({ role: 'user', content: userMessage });

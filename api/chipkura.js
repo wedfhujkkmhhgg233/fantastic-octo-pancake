@@ -104,6 +104,11 @@ router.get('/chipkura', async (req, res) => {
     const raw1 = await sendToChipp();
     const { result: result1, browseWebDetected, retrieveUrlDetected, browseData, retrieveData } = parseResponse(raw1);
 
+    // Log the full raw response if retrieveUrl was detected
+  if (retrieveUrlDetected) {
+    console.log('[Full raw response for retrieveUrl]', raw1);
+  }
+    
     if (browseWebDetected) {
       messages.push({
         role: 'assistant',

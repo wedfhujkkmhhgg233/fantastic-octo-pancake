@@ -1,0 +1,100 @@
+const express = require('express');
+const axios = require('axios');
+const router = express.Router();
+
+const chatHistory = new Map();
+
+router.get('/chipkura', async (req, res) => {
+  const { message, userid, imageurl } = req.query;
+  if (!message || !userid) {
+    return res.status(400).json({ error: 'Missing required parameters: message or userid' });
+  }
+
+  const chatSessionId = 'f3f62523-411d-4d6b-b1d0-3de031c27b22';
+  if (!chatHistory.has(userid)) chatHistory.set(userid, []);
+  const messages = chatHistory.get(userid);
+
+  // Format with image metadata if imageurl is present
+  const userMessage = imageurl
+    ? `${message} ![](${imageurl}) %START_MESSAGE_METADATA%(The user has uploaded images to this message. Here are the URLs for the images: ${imageurl})`
+    : message;
+
+  messages.push({ role: 'user', content: userMessage });
+
+  try {
+    const response = await axios.post('https://kurapika-42900.chipp.ai/api/chat',
+      { messages, chatSessionId },
+      {
+        headers: {
+          'accept': '/',
+          'content-type': 'application/json',
+          'cookie': '__Host-next-auth.csrf-token=your-token; __Secure-next-auth.callback-url=https://app.chipp.ai; userId_42900=your-userid; correlationId=your-correlation-id',
+          'origin': 'https://kurapika-42900.chipp.ai',
+          'referer': 'https://kurapika-42900.chipp.ai/w/chat/',
+          'user-agent': 'Mozilla/5.0 (Linux; Android 10; K)'
+        }
+      }
+    );
+
+    const raw = response.data;
+    const lines = raw.split('\n');
+
+    const result = { message: '', image: null };
+    let browseWebDetected = null;
+
+    for (const line of lines) {
+      const index = line.indexOf(':');
+      if (index === -1) continue;
+      const code = line.slice(0, index);
+      const content = line.slice(index + 1).trim();
+      if (!content) continue;
+
+      try {
+        if (code === '0') {
+          result.message += JSON.parse(content);
+        } else if (code === '9') {
+          const json = JSON.parse(content);
+          if (json.toolName === 'browseWeb') {
+            browseWebDetected = userMessage;
+            result.message += `\n(Browsed: ${json.args?.prompt})`;
+          }
+        } else if (code === 'a') {
+          const json = JSON.parse(content);
+          if (json.result?.organic) {
+            const articles = json.result.organic.map((item, i) =>
+              `Result ${i + 1}:\nTitle: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}\n`
+            ).join('\n');
+            result.message += '\n' + articles;
+          } else {
+            const match = json.result.match(/https?:\/\/[^\s)]+/);
+            if (match) result.image = match[0];
+          }
+        }
+      } catch (e) {
+        console.warn(`Skipping malformed line [${code}]: ${content}`);
+      }
+    }
+
+    messages.push({ role: 'assistant', content: result.message });
+
+    // Handle silent resend for browseWeb
+    if (browseWebDetected) {
+      messages.push({ role: 'user', content: browseWebDetected });
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error('[chipkura error]', err.message);
+    res.status(500).json({ error: 'Failed to contact Chipp AI.' });
+  }
+});
+
+const serviceMetadata = {
+  name: 'chipkura',
+  description: 'Talk to Chipp AI with optional image input and memory.',
+  category: 'AI 🤖',
+  author: 'Jerome',
+  usage: '/chipkura?message=hi&userid=123&imageurl='
+};
+
+module.exports = { router, serviceMetadata };

@@ -92,7 +92,7 @@ const serviceMetadata = {
   description: 'Talk to Chipp AI with optional image input and memory.',
   category: 'AI 🤖',
   author: 'Jerome',
-  usage: '/chipkura?message=hi&userid=&imageurl='
+  usage: '/api/chipkura?message=hi&userid=&imageurl='
 };
 
 export { router, serviceMetadata };

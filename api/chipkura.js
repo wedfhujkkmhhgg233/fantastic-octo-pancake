@@ -13,6 +13,7 @@ router.get('/chipkura', async (req, res) => {
   }
 
   const chatSessionId = 'f3f62523-411d-4d6b-b1d0-3de031c27b22';
+
   if (!chatHistory.has(userid)) chatHistory.set(userid, []);
   const messages = chatHistory.get(userid);
 
@@ -33,9 +34,10 @@ router.get('/chipkura', async (req, res) => {
         'cookie': '__Host-next-auth.csrf-token=your-token; __Secure-next-auth.callback-url=https://app.chipp.ai; userId_42900=your-userid; correlationId=your-correlation-id',
         'origin': 'https://kurapika-42900.chipp.ai',
         'referer': 'https://kurapika-42900.chipp.ai/w/chat/',
-        'user-agent': 'Mozilla/5.0 (Linux; Android 10; K)'
+        'user-agent': 'Mozilla/5.0'
       }
     });
+
     return response.data;
   };
 
@@ -48,6 +50,7 @@ router.get('/chipkura', async (req, res) => {
     for (const line of lines) {
       const index = line.indexOf(':');
       if (index === -1) continue;
+
       const code = line.slice(0, index);
       const content = line.slice(index + 1).trim();
       if (!content) continue;
@@ -64,6 +67,9 @@ router.get('/chipkura', async (req, res) => {
             const retrieveResult = await sendRequest(messages);
             result.message = retrieveResult.message;
             result.image = retrieveResult.image;
+
+            // Save to responseMap
+            responseMap.set('finalResponse', retrieveResult);
           }
         } else if (code === 'a') {
           const json = JSON.parse(content);
@@ -73,10 +79,9 @@ router.get('/chipkura', async (req, res) => {
               link: item.link,
               snippet: item.snippet
             }));
-            const formatted = browseData.map((item, i) =>
-              `Result ${i + 1}:\nTitle: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}\n`
+            result.message += '\n' + browseData.map((item, i) =>
+              `Result ${i + 1}:\nTitle: ${item.title}\nLink: ${item.link}\nSnippet: ${item.snippet}`
             ).join('\n');
-            result.message += '\n' + formatted;
           }
 
           const match = json.result?.match?.(/https?:\/\/[^\s)]+/);
@@ -102,8 +107,7 @@ router.get('/chipkura', async (req, res) => {
         ).join('\n\n')
       });
 
-      messages.push({ role: 'user', content: userMessage });
-
+      // Don't push duplicate user message again
       const raw2 = await sendToChipp();
       const { result: result2 } = await parseResponse(raw2);
 
@@ -111,6 +115,7 @@ router.get('/chipkura', async (req, res) => {
       if (finalResponse) {
         result2.message = finalResponse.message;
         result2.image = finalResponse.image;
+        responseMap.delete('finalResponse'); // CLEAR IT AFTER USE
       }
 
       messages.push({ role: 'assistant', content: result2.message });
@@ -120,13 +125,15 @@ router.get('/chipkura', async (req, res) => {
       if (finalResponse) {
         result1.message = finalResponse.message;
         result1.image = finalResponse.image;
+        responseMap.delete('finalResponse'); // CLEAR IT AFTER USE
       }
 
       messages.push({ role: 'assistant', content: result1.message });
       return res.json(result1);
     }
-  } catch {
-    res.status(500).json({ error: 'Failed to contact Chipp AI.' });
+
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to contact Chipp AI.' });
   }
 });
 

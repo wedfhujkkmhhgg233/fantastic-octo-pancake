@@ -1,5 +1,6 @@
 import express from 'express';
 import axios from 'axios';
+import { sendRequest } from './retrieveurl'; // Import sendRequest from retrieveurl
 
 const router = express.Router();
 const chatHistory = new Map();
@@ -41,10 +42,8 @@ router.get('/chipkura', async (req, res) => {
   const parseResponse = (raw) => {
     const lines = raw.split('\n');
     let browseWebDetected = false;
-    let retrieveUrlDetected = false;
     let result = { message: '', image: null };
     let browseData = [];
-    let retrieveData = null;
 
     for (const line of lines) {
       const index = line.indexOf(':');
@@ -60,8 +59,20 @@ router.get('/chipkura', async (req, res) => {
           const json = JSON.parse(content);
           if (json.toolName === 'browseWeb') {
             browseWebDetected = true;
-          } else if (json.toolName === 'retrieveUrl') {
-            retrieveUrlDetected = true;
+          }
+          // Check for 'retrieveurl' tool and invoke sendRequest
+          if (json.toolName === 'retrieveurl') {
+            // If retrieveurl tool is detected, use sendRequest
+            const messagesForRetrieveUrl = [{ role: 'user', content: message }];
+            sendRequest(messagesForRetrieveUrl)
+              .then(response => {
+                result.message = response.message;
+                result.image = response.image;
+              })
+              .catch(error => {
+                console.error('Error calling retrieveurl:', error);
+                result.message = 'Error retrieving URL data.';
+              });
           }
         } else if (code === 'a') {
           const json = JSON.parse(content);
@@ -78,17 +89,6 @@ router.get('/chipkura', async (req, res) => {
             result.message += '\n' + formatted;
           }
 
-          // Handle retrieveUrl markdown
-          if (json.result?.markdown) {
-            retrieveData = {
-              url: json.args?.url,
-              query: json.args?.query,
-              markdown: json.result.markdown
-            };
-            result.message += '\n' + retrieveData.markdown;
-          }
-
-          // Handle images
           const match = json.result?.match?.(/https?:\/\/[^\s)]+/);
           if (match) result.image = match[0];
         }
@@ -97,18 +97,13 @@ router.get('/chipkura', async (req, res) => {
       }
     }
 
-    return { result, browseWebDetected, retrieveUrlDetected, browseData, retrieveData };
+    return { result, browseWebDetected, browseData };
   };
 
   try {
     const raw1 = await sendToChipp();
-    const { result: result1, browseWebDetected, retrieveUrlDetected, browseData, retrieveData } = parseResponse(raw1);
+    const { result: result1, browseWebDetected, browseData } = parseResponse(raw1);
 
-    // Log the full raw response if retrieveUrl was detected
-  if (retrieveUrlDetected) {
-    console.log('[Full raw response for retrieveUrl]', raw1);
-  }
-    
     if (browseWebDetected) {
       messages.push({
         role: 'assistant',
@@ -122,19 +117,6 @@ router.get('/chipkura', async (req, res) => {
       const { result: result2 } = parseResponse(raw2);
       messages.push({ role: 'assistant', content: result2.message });
       return res.json(result2);
-
-    } else if (retrieveUrlDetected) {
-      messages.push({
-        role: 'assistant',
-        content: retrieveData.markdown
-      });
-
-      messages.push({ role: 'user', content: userMessage });
-      const raw2 = await sendToChipp();
-      const { result: result2 } = parseResponse(raw2);
-      messages.push({ role: 'assistant', content: result2.message });
-      return res.json(result2);
-
     } else {
       messages.push({ role: 'assistant', content: result1.message });
       return res.json(result1);
@@ -147,7 +129,7 @@ router.get('/chipkura', async (req, res) => {
 
 const serviceMetadata = {
   name: "chipkura",
-  description: "Talk to Chipp AI with optional image input and memory. Supports browseWeb and retrieveUrl tool handling.",
+  description: "Talk to Chipp AI with optional image input and memory. Supports browseWeb tool handling.",
   category: "AI",
   author: "Jerome",
   link: ["/api/chipkura?message=hi&userid=&imageurl="]

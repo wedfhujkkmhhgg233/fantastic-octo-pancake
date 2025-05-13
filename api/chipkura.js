@@ -1,6 +1,6 @@
 import express from 'express';
 import axios from 'axios';
-import { sendRequest } from './retrieveurl'; // Import sendRequest from retrieveurl
+import { sendRequest } from './retrieveurl.js'; // Import sendRequest from retrieveurl
 
 const router = express.Router();
 const chatHistory = new Map();

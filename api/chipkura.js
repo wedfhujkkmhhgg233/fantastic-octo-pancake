@@ -1,6 +1,6 @@
 import express from 'express';
 import axios from 'axios';
-import { sendRequest } from './retrieveurl.js'; // Import sendRequest from retrieveurl
+import { sendRequest, responseMap } from './retrieveurl.js'; // Import sendRequest and responseMap
 
 const router = express.Router();
 const chatHistory = new Map();
@@ -63,7 +63,7 @@ router.get('/chipkura', async (req, res) => {
           // Check for 'retrieveurl' tool and invoke sendRequest
           if (json.toolName === 'retrieveurl') {
             // If retrieveurl tool is detected, use sendRequest
-            const messagesForRetrieveUrl = [{ role: 'user', content: message }];
+            const messagesForRetrieveUrl = messages; // Send entire chat history to retrieveurl tool
             sendRequest(messagesForRetrieveUrl)
               .then(response => {
                 result.message = response.message;
@@ -115,6 +115,14 @@ router.get('/chipkura', async (req, res) => {
       messages.push({ role: 'user', content: userMessage });
       const raw2 = await sendToChipp();
       const { result: result2 } = parseResponse(raw2);
+
+      // Check for final response from responseMap
+      const finalResponse = responseMap.get('finalResponse');
+      if (finalResponse) {
+        result2.message = finalResponse.message;
+        result2.image = finalResponse.image;
+      }
+
       messages.push({ role: 'assistant', content: result2.message });
       return res.json(result2);
     } else {

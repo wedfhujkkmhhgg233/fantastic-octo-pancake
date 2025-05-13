@@ -60,14 +60,11 @@ router.get('/chipkura', async (req, res) => {
           if (json.toolName === 'browseWeb') {
             browseWebDetected = true;
           }
-         if (json.toolName === 'retrieveurl') {
-  const retrieveResult = await sendRequest([{
-    role: 'user',
-    content: message
-  }]);
-  result.message = retrieveResult.message;
-  result.image = retrieveResult.image;
-}
+          if (json.toolName === 'retrieveUrl') {
+            const retrieveResult = await sendRequest(messages);
+            result.message = retrieveResult.message;
+            result.image = retrieveResult.image;
+          }
         } else if (code === 'a') {
           const json = JSON.parse(content);
           if (json.result?.organic) {

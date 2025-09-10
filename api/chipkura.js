@@ -67,6 +67,12 @@ router.get('/chipkura', async (req, res) => {
             result.message += match[1].replace(/\\n/g, '\n');
           }
         }
+
+        // detect image URLs inside any line
+        const imgMatch = line.match(/https:\/\/storage\.googleapis\.com\/chipp-images\/[^\s"]+\.jpg/);
+        if (imgMatch) {
+          result.image = imgMatch[0];
+        }
       }
     } catch (e) {
       console.error('Error parsing response:', e.message);
@@ -98,7 +104,7 @@ router.get('/chipkura', async (req, res) => {
 
 const serviceMetadata = {
   name: "chipkura",
-  description: "Talk to Chipp AI with optional image input and memory. Supports browseWeb clean parsing (only returns real assistant message).",
+  description: "Talk to Chipp AI with optional image input and memory. Detects chipp-generated image URLs automatically.",
   category: "AI",
   author: "Jerome",
   link: ["/chipkura?message=hi&userid=&imageurl="]

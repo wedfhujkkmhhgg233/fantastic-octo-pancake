@@ -63,7 +63,8 @@ router.get('/chipkura', async (req, res) => {
         if (line.startsWith('0:')) {
           const match = line.match(/0:"(.*)"/);
           if (match) {
-            result.message += match[1];
+            // convert escaped newlines to real newlines
+            result.message += match[1].replace(/\\n/g, '\n');
           }
         }
       }

@@ -27,19 +27,19 @@ router.get('/chipkura', async (req, res) => {
 
   const sendToChipp = async () => {
     const response = await axios.post(
-      'https://kurapika-42900.chipp.ai/api/chat',
+      'https://kurapika-10019682.chipp.ai/api/chat',
       {
         id: Math.random().toString(36).substring(2, 12),
         messages,
-        chatSessionId: '01b29ece-93eb-4c9c-aa92-96bf0b51ff7f'
+        chatSessionId: '96637cf9-e615-496f-9129-efcd1c8d1391'
       },
       {
         headers: {
           accept: '*/*',
           'accept-language': 'en-US,en;q=0.9',
           'content-type': 'application/json',
-          'x-app-name-id': 'Kurapika-42900',
-          referer: 'https://kurapika-42900.chipp.ai/w/chat/kurapika-42900/session/01b29ece-93eb-4c9c-aa92-96bf0b51ff7f',
+          'x-app-name-id': 'Kurapika-10019682',
+          referer: 'https://kurapika-10019682.chipp.ai/w/chat/kurapika-10019682/session/96637cf9-e615-496f-9129-efcd1c8d1391',
           'referrer-policy': 'strict-origin-when-cross-origin',
           'user-agent': 'Mozilla/5.0'
         },

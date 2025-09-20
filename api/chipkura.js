@@ -6,17 +6,27 @@ const router = express.Router();
 const chatHistory = new Map();
 
 router.get('/chipkura', async (req, res) => {
-  const { message, userid, imageurl } = req.query;
+  let { message, userid, imageurl } = req.query;
 
   if (!message || !userid) {
     return res.status(400).json({ error: 'Missing required parameters: message or userid' });
   }
 
+  // normalize imageurl to array (accept comma-separated or multiple query params)
+  let imageUrls = [];
+  if (imageurl) {
+    if (Array.isArray(imageurl)) {
+      imageUrls = imageurl;
+    } else if (typeof imageurl === 'string') {
+      imageUrls = imageurl.split(',').map(u => u.trim()).filter(u => u);
+    }
+  }
+
   if (!chatHistory.has(userid)) chatHistory.set(userid, []);
   const messages = chatHistory.get(userid);
 
-  const userMessage = imageurl
-    ? `${message} ![](${imageurl}) %START_MESSAGE_METADATA%(The user has uploaded images to this message. Here are the URLs for the images: ${imageurl})`
+  const userMessage = imageUrls.length > 0
+    ? `${message} ${imageUrls.map(url => `![](${url})`).join(' ')} %START_MESSAGE_METADATA%(The user has uploaded images to this message. Here are the URLs for the images: ${imageUrls.join(', ')})`
     : message;
 
   messages.push({
@@ -51,10 +61,11 @@ router.get('/chipkura', async (req, res) => {
   };
 
   const parseResponse = async (raw) => {
-    let result = { message: '', image: null };
+    let result = { message: '', image: [] };
 
     try {
       const lines = raw.split(/\r?\n/);
+      const foundImages = [];
 
       for (const line of lines) {
         if (!line.trim()) continue;
@@ -68,11 +79,16 @@ router.get('/chipkura', async (req, res) => {
           }
         }
 
-        // detect image URLs inside any line
-        const imgMatch = line.match(/https:\/\/storage\.googleapis\.com\/chipp-images\/[^\s"]+\.jpg/);
-        if (imgMatch) {
-          result.image = imgMatch[0];
+        // detect ALL image URLs inside any line
+        const imgMatches = line.match(/https:\/\/storage\.googleapis\.com\/chipp-images\/[^\s"]+\.jpg/g);
+        if (imgMatches) {
+          foundImages.push(...imgMatches);
         }
+      }
+
+      if (foundImages.length > 0) {
+        // remove duplicates
+        result.image = [...new Set(foundImages)];
       }
     } catch (e) {
       console.error('Error parsing response:', e.message);
@@ -89,7 +105,11 @@ router.get('/chipkura', async (req, res) => {
     const finalResponse = responseMap.get('finalResponse');
     if (finalResponse) {
       result.message = finalResponse.message;
-      result.image = finalResponse.image;
+      if (Array.isArray(finalResponse.image)) {
+        result.image = finalResponse.image;
+      } else if (typeof finalResponse.image === 'string') {
+        result.image = [finalResponse.image];
+      }
       responseMap.delete('finalResponse');
     }
 
@@ -104,10 +124,10 @@ router.get('/chipkura', async (req, res) => {
 
 const serviceMetadata = {
   name: "chipkura",
-  description: "Talk to Chipp AI with optional image input and memory. Detects chipp-generated image URLs automatically.",
+  description: "Talk to Chipp AI with optional multiple image inputs and memory. Detects multiple chipp-generated image URLs automatically, returned as an array.",
   category: "AI",
   author: "Jerome",
-  link: ["/chipkura?message=hi&userid=&imageurl="]
+  link: ["/chipkura?message=hi&userid=&imageurl=url1,url2"]
 };
 
 export { router, serviceMetadata };

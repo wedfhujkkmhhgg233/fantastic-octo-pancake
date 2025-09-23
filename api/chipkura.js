@@ -37,19 +37,19 @@ router.get('/chipkura', async (req, res) => {
 
   const sendToChipp = async () => {
     const response = await axios.post(
-      'https://kurapika-10019682.chipp.ai/api/chat',
+      'https://copyofaitutor-10021358.chipp.ai/api/chat',
       {
         id: Math.random().toString(36).substring(2, 12),
         messages,
-        chatSessionId: '96637cf9-e615-496f-9129-efcd1c8d1391'
+        chatSessionId: '9f1e6926-f4c6-4f4f-ab1f-6fcb805d455e'
       },
       {
         headers: {
           accept: '*/*',
           'accept-language': 'en-US,en;q=0.9',
           'content-type': 'application/json',
-          'x-app-name-id': 'Kurapika-10019682',
-          referer: 'https://kurapika-10019682.chipp.ai/w/chat/kurapika-10019682/session/96637cf9-e615-496f-9129-efcd1c8d1391',
+          'x-app-name-id': 'Copyofaitutor-10021358',
+          referer: 'https://copyofaitutor-10021358.chipp.ai/w/chat/kurapika-10019682/session/96637cf9-e615-496f-9129-efcd1c8d1391',
           'referrer-policy': 'strict-origin-when-cross-origin',
           'user-agent': 'Mozilla/5.0'
         },

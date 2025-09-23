@@ -41,7 +41,7 @@ router.get('/chipkura', async (req, res) => {
       {
         id: Math.random().toString(36).substring(2, 12),
         messages,
-        chatSessionId: '9f1e6926-f4c6-4f4f-ab1f-6fcb805d455e'
+        chatSessionId: '71c26725-7d70-43f3-9484-17625b0b0e23'
       },
       {
         headers: {
